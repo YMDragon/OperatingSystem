@@ -1,6 +1,7 @@
 package nachos.threads;
 
 import nachos.machine.*;
+import sun.nio.cs.ext.MacArabic;
 
 /**
  * A KThread is a thread that can be used to execute Nachos kernel code. Nachos
@@ -199,6 +200,9 @@ public class KThread {
 
         currentThread.status = statusFinished;
 
+        if (currentThread.joinThread != null)
+            currentThread.joinThread.ready();
+
         sleep();
     }
 
@@ -280,6 +284,16 @@ public class KThread {
 
         Lib.assertTrue(this != currentThread);
 
+        if (status == statusFinished)
+            return;
+
+        boolean initState = Machine.interrupt().disable();
+
+        Lib.assertTrue(joinThread != null);
+        joinThread = currentThread;
+        currentThread.sleep();
+
+        Machine.interrupt().restore(initState);
     }
 
     /**
@@ -445,4 +459,6 @@ public class KThread {
     private static KThread currentThread = null;
     private static KThread toBeDestroyed = null;
     private static KThread idleThread = null;
+
+    private KThread joinThread = null;
 }
