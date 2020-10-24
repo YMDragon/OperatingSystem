@@ -287,13 +287,13 @@ public class KThread {
         if (status == statusFinished)
             return;
 
-        boolean initState = Machine.interrupt().disable();
+        boolean initStatus = Machine.interrupt().disable();
 
         Lib.assertTrue(joinThread != null);
         joinThread = currentThread;
         currentThread.sleep();
 
-        Machine.interrupt().restore(initState);
+        Machine.interrupt().restore(initStatus);
     }
 
     /**
