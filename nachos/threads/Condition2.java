@@ -81,3 +81,4 @@ public class Condition2 {
     private Lock conditionLock;
     private ThreadQueue waitQueue =
         ThreadKernel.scheduler.newThreadQueue(false);
+}
