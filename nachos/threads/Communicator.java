@@ -37,12 +37,14 @@ public class Communicator {
         numSpeak += 1;
         wordQueue.offer(word);
 
-        while(numListen == 0)
-            waitSpeak.sleep();
-        
-        numListen -= 1;
+        if(numListen > 0)
+            waitListen.wake();
+        else{
+            while(numListen == 0)
+                waitSpeak.sleep();
+        }
 
-        waitListen.wake();
+        numListen -= 1;
 
         lock.release();
     }
@@ -57,16 +59,20 @@ public class Communicator {
         lock.acquire();
 
         numListen += 1;
-        while(numSpeak == 0)
-            waitListen.sleep();
+
+        if(numSpeak > 0)
+            waitSpeak.wake();
+        else{
+            while(numSpeak == 0)
+                waitListen.sleep();
+        }
         
         int word = wordQueue.remove();
         numSpeak -= 1;
 
-        waitSpeak.wake();
-
         lock.release();
         
+        return word;
     }
     private Condition2 waitSpeak, waitListen;
     private Lock lock;
