@@ -17,8 +17,8 @@ public class Communicator {
      * Allocate a new communicator.
      */
     public Communicator() {
-        waitSpeak = Condition2(lock);
-        waitListen = Condition2(lock);
+        waitSpeak = new Condition2(lock);
+        waitListen = new Condition2(lock);
     }
 
     /**
@@ -77,5 +77,5 @@ public class Communicator {
     private Condition2 waitSpeak, waitListen;
     private Lock lock;
     private int numSpeak, numListen;
-    private Queue<int> wordQueue = new LinkedList<int>();
+    private Queue<Integer> wordQueue = new LinkedList<Integer>();
 }
