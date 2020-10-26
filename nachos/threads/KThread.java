@@ -1,7 +1,6 @@
 package nachos.threads;
 
 import nachos.machine.*;
-import sun.nio.cs.ext.MacArabic;
 
 /**
  * A KThread is a thread that can be used to execute Nachos kernel code. Nachos

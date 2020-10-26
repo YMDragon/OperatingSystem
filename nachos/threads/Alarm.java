@@ -22,7 +22,6 @@ public class Alarm {
                 timerInterrupt();
             }
         });
-        waitQueue = new PriorityQueue<>((a, b) -> ((int) (a.wakeTime - b.wakeTime)));
     }
 
     /**
@@ -77,7 +76,16 @@ public class Alarm {
             this.thread = thread;
             this.wakeTime = wakeTime;
         }
+
+        public int compareTo(WaitThread o) {
+            if (wakeTime < o.wakeTime)
+                return -1;
+            else if (wakeTime > o.wakeTime)
+                return 1;
+            else
+                return 0;
+        }
     }
 
-    private PriorityQueue<WaitThread> waitQueue = null;
+    private PriorityQueue<WaitThread> waitQueue = new PriorityQueue<>();
 }
