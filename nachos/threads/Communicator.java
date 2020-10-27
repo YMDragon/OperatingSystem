@@ -75,7 +75,7 @@ public class Communicator {
         return word;
     }
     private Condition2 waitSpeak, waitListen;
-    private Lock lock;
+    private Lock lock = new Lock();
     private int numSpeak, numListen;
     private Queue<Integer> wordQueue = new LinkedList<Integer>();
 }
