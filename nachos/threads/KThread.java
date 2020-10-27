@@ -288,7 +288,7 @@ public class KThread {
 
         boolean initStatus = Machine.interrupt().disable();
 
-        Lib.assertTrue(joinThread != null);
+        Lib.assertTrue(joinThread == null);
         joinThread = currentThread;
         currentThread.sleep();
 
