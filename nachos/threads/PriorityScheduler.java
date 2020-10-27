@@ -153,7 +153,6 @@ public class PriorityScheduler extends Scheduler {
 			}
 
 			waitQueue.remove(threadState);
-			holdThread = threadState;
 			updateEffectivePriority();
 			threadState.acquire(this);
 			return threadState.thread;
@@ -175,7 +174,9 @@ public class PriorityScheduler extends Scheduler {
 
 		public void print() {
 			Lib.assertTrue(Machine.interrupt().disabled());
-			// implement me (if you want)
+			for (ThreadState threadState : waitQueue)
+				System.out.println(threadState.thread.toString() + " " + threadState.effectivePriority);
+			System.out.println("");
 		}
 
 		public int getEffectivePriority() {
@@ -282,6 +283,8 @@ public class PriorityScheduler extends Scheduler {
 		 * @see nachos.threads.ThreadQueue#nextThread
 		 */
 		public void acquire(PriorityQueue waitQueue) {
+			waitQueue.holdThread = this;
+
 			waitingQueue.remove(waitQueue);
 			holdingQueue.offer(waitQueue);
 			updateEffectivePriority();
