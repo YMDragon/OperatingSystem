@@ -4,12 +4,23 @@ import nachos.ag.BoatGrader;
 
 public class Boat {
 	static BoatGrader bg;
+	static int numAdultsinOahu;
+	static int numChildreninOahu;
+	static int numAdultsinMolokai;
+	static int numChildreninMolokai;
+	static Lock finishLock = new Lock();
+	static Condition finishWork = new Condition(finishLock);
+	static Lock waitLock = new Lock();
+	static Condition waitPeople = new Condition(waitLock);
+	static boolean finished = false;
+	static int boatPosition = 0;
+	static int childOnBoat = 0;
 
 	public static void selfTest() {
 		BoatGrader b = new BoatGrader();
 
 		System.out.println("\n ***Testing Boats with only 2 children***");
-		begin(0, 2, b);
+		begin(3, 3, b);
 
 		// System.out.println("\n ***Testing Boats with 2 children, 1 adult***");
 		// begin(1, 2, b);
@@ -28,31 +39,116 @@ public class Boat {
 		// Create threads here. See section 3.4 of the Nachos for Java
 		// Walkthrough linked from the projects page.
 
-		Runnable r = new Runnable() {
-			public void run() {
-				SampleItinerary();
+		finishLock.acquire();
+
+		numAdultsinOahu = adults;
+		numChildreninOahu = children;
+		numAdultsinMolokai = 0;
+		numChildreninMolokai = 0;
+		finished = false;
+		boatPosition = 0;
+		childOnBoat = 0;
+
+		Runnable r1 = new Runnable(){
+			public void run(){
+				AdultItinerary();
 			}
 		};
-		KThread t = new KThread(r);
-		t.setName("Sample Boat Thread");
-		t.fork();
+		for(int i = 0; i < adults; i++){
+			KThread t = new KThread(r1);
+			t.setName("Adult Thread" + i);
+			t.fork();
+		}
+		
+		Runnable r2 = new Runnable(){
+			public void run(){
+				ChildItinerary();
+			}
+		};
+		for(int i = 0; i < children; i++){
+			KThread t = new KThread(r2);
+			t.setName("Child Thread" + i);
+			t.fork();
+		}
 
+		while(numChildreninOahu + numAdultsinOahu > 0){
+			finishWork.wake();
+			finishWork.sleep();
+		}
+		finished = true;
+		//finishWork.sleep();
+		
 	}
 
 	static void AdultItinerary() {
+		waitLock.acquire();
+
 		bg.initializeAdult(); // Required for autograder interface. Must be the first thing called.
 		// DO NOT PUT ANYTHING ABOVE THIS LINE.
 
-		/*
-		 * This is where you should put your solutions. Make calls to the BoatGrader to
-		 * show that it is synchronized. For example: bg.AdultRowToMolokai(); indicates
-		 * that an adult has rowed the boat across to Molokai
-		 */
+		int position = new Integer(0);
+
+		while(!finished){
+			if(position == 0 && boatPosition == 0){
+				if(numChildreninOahu == 1 && childOnBoat == 0){
+					numAdultsinOahu -= 1;
+					bg.AdultRowToMolokai();
+					numAdultsinMolokai += 1;
+					position = 1;
+					boatPosition = 1;
+				}
+			}
+			waitPeople.wake();
+			waitPeople.sleep();
+		}
+
+		waitPeople.sleep();
 	}
 
 	static void ChildItinerary() {
+		waitLock.acquire();
+
 		bg.initializeChild(); // Required for autograder interface. Must be the first thing called.
 		// DO NOT PUT ANYTHING ABOVE THIS LINE.
+
+		int position = new Integer(0);
+
+		while(!finished){
+			if(position == 0){
+				if(boatPosition == 0){
+					if(numChildreninOahu >= 2 || numAdultsinOahu == 0 || childOnBoat == 1){
+						numChildreninOahu -= 1;
+						numChildreninMolokai += 1;
+						position = 1;
+						if(childOnBoat == 0){
+							childOnBoat = 1;
+							bg.ChildRowToMolokai();
+						}
+						else{
+							childOnBoat = 0;
+							bg.ChildRideToMolokai();
+							boatPosition = 1;
+						}
+					}
+					finishLock.acquire();
+					finishWork.wake();
+					finishLock.release();
+				}
+			}
+			else{
+				if(boatPosition == 1){
+					numChildreninMolokai -= 1;
+					bg.ChildRowToOahu();
+					numChildreninOahu += 1;
+					position = 0;
+					boatPosition = 0;
+				}
+			}
+			waitPeople.wake();
+			waitPeople.sleep();
+		}
+
+		waitPeople.sleep();
 	}
 
 	static void SampleItinerary() {
