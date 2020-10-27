@@ -127,8 +127,6 @@ public class PriorityScheduler extends Scheduler {
 	protected class PriorityQueue extends ThreadQueue {
 		PriorityQueue(boolean transferPriority) {
 			this.transferPriority = transferPriority;
-			for (int i = priorityMinimum; i <= priorityMaximum; i++)
-				waitQueue[i] = new LinkedList<KThread>();
 		}
 
 		public void waitForAccess(KThread thread) {
@@ -143,8 +141,10 @@ public class PriorityScheduler extends Scheduler {
 
 		public KThread nextThread() {
 			Lib.assertTrue(Machine.interrupt().disabled());
-			if (holdThread != null)
-				getThreadState(holdThread).holdingQueue.remove(this);
+			if (holdThread != null) {
+				holdThread.holdingQueue.remove(this);
+				holdThread.updateEffectivePriority();
+			}
 
 			ThreadState threadState = pickNextThread();
 			if (threadState == null) {
@@ -152,12 +152,11 @@ public class PriorityScheduler extends Scheduler {
 				return null;
 			}
 
-			KThread thread = threadState.thread;
-			waitQueue[threadState.priority].remove(thread);
-			holdThread = thread;
+			waitQueue.remove(threadState);
+			holdThread = threadState;
 			updateEffectivePriority();
-			acquire(thread);
-			return thread;
+			threadState.acquire(this);
+			return threadState.thread;
 		}
 
 		/**
@@ -167,10 +166,11 @@ public class PriorityScheduler extends Scheduler {
 		 * @return the next thread that <tt>nextThread()</tt> would return.
 		 */
 		protected ThreadState pickNextThread() {
-			for (int i = priorityMaximum; i >= priorityMinimum; i--)
-				if (!waitQueue[i].isEmpty())
-					return getThreadState(waitQueue[i].peek());
-			return null;
+			ThreadState threadState = null;
+			for (ThreadState oThreadState : waitQueue)
+				if (threadState == null || oThreadState.getEffectivePriority() > threadState.getEffectivePriority())
+					threadState = oThreadState;
+			return threadState;
 		}
 
 		public void print() {
@@ -185,13 +185,11 @@ public class PriorityScheduler extends Scheduler {
 		public void updateEffectivePriority() {
 			int oldEffectivePriority = effectivePriority;
 			effectivePriority = -1;
-			for (int i = priorityMaximum; i >= priorityMinimum; i--)
-				if (!waitQueue[i].isEmpty()) {
-					effectivePriority = i;
-					break;
-				}
+			for (ThreadState threadState : waitQueue)
+				if (threadState.getEffectivePriority() > effectivePriority)
+					effectivePriority = threadState.getEffectivePriority();
 			if (oldEffectivePriority != effectivePriority && holdThread != null)
-				getThreadState(holdThread).updateEffectivePriority();
+				holdThread.updateEffectivePriority();
 		}
 
 		/**
@@ -200,9 +198,9 @@ public class PriorityScheduler extends Scheduler {
 		 */
 		public boolean transferPriority;
 
-		protected int effectivePriority = -1;
-		protected KThread holdThread = null;
-		protected LinkedList<KThread>[] waitQueue = new LinkedList[priorityMaximum - priorityMinimum + 1];
+		private int effectivePriority = -1;
+		private ThreadState holdThread = null;
+		protected LinkedList<ThreadState> waitQueue = new LinkedList<>();
 	}
 
 	/**
@@ -251,15 +249,7 @@ public class PriorityScheduler extends Scheduler {
 		public void setPriority(int priority) {
 			if (this.priority == priority)
 				return;
-
-			if (this.priority != -1)
-				for (PriorityQueue threadQueue : waitingQueue)
-					threadQueue.waitQueue[this.priority].remove(this.thread);
-
 			this.priority = priority;
-			for (PriorityQueue threadQueue : waitingQueue)
-				threadQueue.waitQueue[this.priority].offer(this.thread);
-
 			updateEffectivePriority();
 		}
 
@@ -275,7 +265,7 @@ public class PriorityScheduler extends Scheduler {
 		 * @see nachos.threads.ThreadQueue#waitForAccess
 		 */
 		public void waitForAccess(PriorityQueue waitQueue) {
-			waitQueue.waitQueue[priority].offer(thread);
+			waitQueue.waitQueue.offer(this);
 			waitQueue.updateEffectivePriority();
 
 			waitingQueue.offer(waitQueue);

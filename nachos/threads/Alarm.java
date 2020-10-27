@@ -1,5 +1,6 @@
 package nachos.threads;
 
+import java.util.Comparator;
 import java.util.PriorityQueue;
 
 import nachos.machine.*;
@@ -68,7 +69,7 @@ public class Alarm {
         Machine.interrupt().restore(initStatus);
     }
 
-    private class WaitThread {
+    public class WaitThread {
         public KThread thread;
         public long wakeTime;
 
@@ -76,16 +77,16 @@ public class Alarm {
             this.thread = thread;
             this.wakeTime = wakeTime;
         }
+    }
 
-        public int compareTo(WaitThread o) {
-            if (wakeTime < o.wakeTime)
+    private PriorityQueue<WaitThread> waitQueue = new PriorityQueue<>(new Comparator<WaitThread>() {
+        public int compare(WaitThread a, WaitThread b) {
+            if (a.wakeTime < b.wakeTime)
                 return -1;
-            else if (wakeTime > o.wakeTime)
+            else if (a.wakeTime > b.wakeTime)
                 return 1;
             else
                 return 0;
         }
-    }
-
-    private PriorityQueue<WaitThread> waitQueue = new PriorityQueue<>();
+    });
 }
