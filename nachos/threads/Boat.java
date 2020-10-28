@@ -9,9 +9,9 @@ public class Boat {
 	static int numAdultsinMolokai;
 	static int numChildreninMolokai;
 	static Lock finishLock = new Lock();
-	static Condition finishWork = new Condition(finishLock);
+	static Condition2 finishWork = new Condition2(finishLock);
 	static Lock waitLock = new Lock();
-	static Condition waitPeople = new Condition(waitLock);
+	static Condition2 waitPeople = new Condition2(waitLock);
 	static boolean finished = false;
 	static int boatPosition = 0;
 	static int childOnBoat = 0;

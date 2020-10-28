@@ -433,6 +433,7 @@ public class KThread {
         });
         thread2.fork();
         thread1.fork();
+        thread2.join();
     }
 
     private static final char dbgThread = 't';

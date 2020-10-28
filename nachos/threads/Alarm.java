@@ -89,4 +89,26 @@ public class Alarm {
                 return 0;
         }
     });
+
+    static int fin = 0;
+
+    public static void selftest() {
+        KThread thread1 = new KThread(new Runnable() {
+            public void run() {
+                ThreadedKernel.alarm.waitUntil(1000);
+                fin = 1;
+            }
+        }).setName("wait1000");
+        KThread thread2 = new KThread(new Runnable() {
+            public void run() {
+                ThreadedKernel.alarm.waitUntil(2000);
+                if (fin == 0)
+                    System.out.println("error");
+            }
+        }).setName("wait2000");
+        thread2.fork();
+        thread1.fork();
+        thread2.join();
+        System.out.println("\nAlarm test finish.");
+    }
 }
