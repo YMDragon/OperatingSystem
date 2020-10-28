@@ -53,34 +53,31 @@ public class Boat {
 		boatPosition = 0;
 		childOnBoat = 0;
 
-		Runnable r1 = new Runnable(){
-			public void run(){
+		Runnable r1 = new Runnable() {
+			public void run() {
 				AdultItinerary();
 			}
 		};
-		for(int i = 0; i < adults; i++){
+		for (int i = 0; i < adults; i++) {
 			KThread t = new KThread(r1);
 			t.setName("Adult Thread" + i);
 			t.fork();
 		}
-		
-		Runnable r2 = new Runnable(){
-			public void run(){
+
+		Runnable r2 = new Runnable() {
+			public void run() {
 				ChildItinerary();
 			}
 		};
-		for(int i = 0; i < children; i++){
+		for (int i = 0; i < children; i++) {
 			KThread t = new KThread(r2);
 			t.setName("Child Thread" + i);
 			t.fork();
 		}
 
-		while(numChildreninOahu + numAdultsinOahu > 0){
-			finishWork.wake();
+		while (numChildreninOahu + numAdultsinOahu > 0)
 			finishWork.sleep();
-		}
 		finished = true;
-		//finishWork.sleep();
 		finishLock.release();
 	}
 
@@ -92,21 +89,21 @@ public class Boat {
 
 		int position = new Integer(0);
 
-		while(!finished){
-			if(position == 0 && boatPosition == 0){
-				if(numChildreninOahu == 1 && childOnBoat == 0){
-					numAdultsinOahu -= 1;
-					bg.AdultRowToMolokai();
-					numAdultsinMolokai += 1;
-					position = 1;
-					boatPosition = 1;
-				}
+		while (position == 0) {
+			if (boatPosition == 0 && numChildreninOahu == 1 && childOnBoat == 0) {
+				numAdultsinOahu -= 1;
+				bg.AdultRowToMolokai();
+				numAdultsinMolokai += 1;
+				position = 1;
+				boatPosition = 1;
+				waitPeople.wake();
+			} else {
+				waitPeople.wake();
+				waitPeople.sleep();
 			}
-			waitPeople.wake();
-			waitPeople.sleep();
 		}
 
-		waitPeople.sleep();
+		waitLock.release();
 	}
 
 	static void ChildItinerary() {
@@ -117,18 +114,17 @@ public class Boat {
 
 		int position = new Integer(0);
 
-		while(!finished){
-			if(position == 0){
-				if(boatPosition == 0){
-					if(numChildreninOahu >= 2 || numAdultsinOahu == 0 || childOnBoat == 1){
+		while (!finished) {
+			if (position == 0) {
+				if (boatPosition == 0) {
+					if (numChildreninOahu >= 2 || numAdultsinOahu == 0 || childOnBoat == 1) {
 						numChildreninOahu -= 1;
 						numChildreninMolokai += 1;
 						position = 1;
-						if(childOnBoat == 0){
+						if (childOnBoat == 0) {
 							childOnBoat = 1;
 							bg.ChildRowToMolokai();
-						}
-						else{
+						} else {
 							childOnBoat = 0;
 							bg.ChildRideToMolokai();
 							boatPosition = 1;
@@ -138,9 +134,8 @@ public class Boat {
 					finishWork.wake();
 					finishLock.release();
 				}
-			}
-			else{
-				if(boatPosition == 1){
+			} else {
+				if (boatPosition == 1) {
 					numChildreninMolokai -= 1;
 					bg.ChildRowToOahu();
 					numChildreninOahu += 1;
@@ -152,7 +147,7 @@ public class Boat {
 			waitPeople.sleep();
 		}
 
-		waitPeople.sleep();
+		waitLock.release();
 	}
 
 	static void SampleItinerary() {
