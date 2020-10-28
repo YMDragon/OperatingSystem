@@ -436,6 +436,47 @@ public class KThread {
         thread2.join();
     }
 
+    static int thread3Fin = 0;
+    static Lock lock = new Lock();
+
+    public static void selfTestScheduler() {
+        KThread thread1 = new KThread(new Runnable() {
+            public void run() {
+                lock.acquire();
+                KThread.yield();
+                lock.release();
+            }
+        });
+        KThread thread2 = new KThread(new Runnable() {
+            public void run() {
+                if (thread3Fin == 0)
+                    System.out.println("error");
+            }
+        });
+        KThread thread3 = new KThread(new Runnable() {
+            public void run() {
+                lock.acquire();
+                thread3Fin = 1;
+                KThread.yield();
+                lock.release();
+            }
+        });
+        boolean intStatus = Machine.interrupt().disable();
+        ThreadedKernel.scheduler.setPriority(thread2, 2);
+        ThreadedKernel.scheduler.setPriority(thread3, 3);
+        Machine.interrupt().restore(intStatus);
+
+        thread1.fork();
+        KThread.yield();
+        thread3.fork();
+        thread2.fork();
+
+        thread1.join();
+        thread2.join();
+        thread3.join();
+        System.out.println("\nScheduler test finish.");
+    }
+
     private static final char dbgThread = 't';
 
     /**

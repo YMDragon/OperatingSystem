@@ -92,7 +92,7 @@ public class Alarm {
 
     static int fin = 0;
 
-    public static void selftest() {
+    public static void selfTest() {
         KThread thread1 = new KThread(new Runnable() {
             public void run() {
                 ThreadedKernel.alarm.waitUntil(1000);
