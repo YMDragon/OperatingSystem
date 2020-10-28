@@ -418,8 +418,21 @@ public class KThread {
     public static void selfTest() {
         Lib.debug(dbgThread, "Enter KThread.selfTest");
 
-        new KThread(new PingTest(1)).setName("forked thread").fork();
-        new PingTest(0).run();
+        // new KThread(new PingTest(1)).setName("forked thread").fork();
+        // new PingTest(0).run();
+
+        KThread thread1 = new KThread(new PingTest(1));
+        KThread thread2 = new KThread(new Runnable() {
+            public void run() {
+                thread1.join();
+                for (int i = 0; i < 5; i++) {
+                    System.out.println("*** thread 2 looped " + i + " times");
+                    currentThread.yield();
+                }
+            }
+        });
+        thread2.fork();
+        thread1.fork();
     }
 
     private static final char dbgThread = 't';
