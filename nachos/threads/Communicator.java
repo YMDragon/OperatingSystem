@@ -74,6 +74,33 @@ public class Communicator {
         
         return word;
     }
+    public static void selfTest(){
+        Communicator comm = new Communicator();
+        Runnable sp = new Runnable(){
+            public void run(){
+                int num = Lib.random(100);
+                System.out.println("speak " + num);
+                comm.speak(num);
+            }
+        };
+        Runnable li = new Runnable(){
+            public void run(){
+                System.out.println("listen " + comm.listen());
+            }
+        };
+        KThread t1 = new KThread(sp);
+        t1.fork();
+        KThread t2 = new KThread(li);
+        t2.fork();
+        KThread t3 = new KThread(li);
+        t3.fork();
+        KThread t4 = new KThread(sp);
+        t4.fork();
+        for(int i = 0; i < 4; i ++){
+            KThread.yield();
+        }
+    }
+
     private Condition2 waitSpeak, waitListen;
     private Lock lock = new Lock();
     private int numSpeak, numListen;
