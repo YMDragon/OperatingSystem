@@ -15,6 +15,8 @@ public class Boat {
 	static boolean finished = false;
 	static int boatPosition = 0;
 	static int childOnBoat = 0;
+	static boolean finishStart = false;
+
 
 	public static void selfTest() {
 		BoatGrader b = new BoatGrader();
@@ -45,13 +47,14 @@ public class Boat {
 
 		finishLock.acquire();
 
-		numAdultsinOahu = adults;
-		numChildreninOahu = children;
+		numAdultsinOahu = 0;
+		numChildreninOahu = 0;
 		numAdultsinMolokai = 0;
 		numChildreninMolokai = 0;
 		finished = false;
 		boatPosition = 0;
 		childOnBoat = 0;
+		finishStart = false;
 
 		Runnable r1 = new Runnable() {
 			public void run() {
@@ -75,6 +78,11 @@ public class Boat {
 			t.fork();
 		}
 
+		while(adults != numAdultsinOahu || children != numChildreninOahu){
+			finishWork.sleep();
+		}
+		finishStart = true;
+
 		while (numChildreninOahu + numAdultsinOahu > 0)
 			finishWork.sleep();
 		finished = true;
@@ -86,6 +94,15 @@ public class Boat {
 
 		bg.initializeAdult(); // Required for autograder interface. Must be the first thing called.
 		// DO NOT PUT ANYTHING ABOVE THIS LINE.
+
+		numAdultsinOahu += 1;
+		while(!finishStart){
+			finishLock.acquire();
+			finishWork.wake();
+			finishLock.release();
+			waitPeople.wake();
+			waitPeople.sleep();
+		}
 
 		int position = new Integer(0);
 
@@ -111,6 +128,15 @@ public class Boat {
 
 		bg.initializeChild(); // Required for autograder interface. Must be the first thing called.
 		// DO NOT PUT ANYTHING ABOVE THIS LINE.
+
+		numChildreninOahu += 1;
+		while(!finishStart){
+			finishLock.acquire();
+			finishWork.wake();
+			finishLock.release();
+			waitPeople.wake();
+			waitPeople.sleep();
+		}
 
 		int position = new Integer(0);
 
