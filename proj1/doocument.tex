@@ -106,17 +106,23 @@
 
 \section{Task 1:}
 
+The test code is in KThread.selfTest(). There are two threads. Thread 2 call \texttt{Thread1.join()} at begin.
+
 \section{Task 2:}
 
 Since Task 6 will use Condition variable, I don't make a selfTest for this task.
 
 \section{Task 3:}
 
+The test code is in Alarm.selfTest(). One thread waits 1000 clock ticks and another waits 2000 clock ticks. To see which one wake up first.
+
 \section{Task 4:}
 
 The test code is in Communication.selfTest(). It simply generate two random numbers, and speak them, and two other threads will listen them with some order, which I want to test both speak will wait for listen, and listen will wait for speak.
 
 \section{Task 5:}
+
+The test code is in KThread.selfTestScheduler(). There are three threads, thread $i$ with priority $i$. Thread 1 and thread 3 share a lock and thread 1 acquires first. So, the correct finishing order is thread 1, thread 3 and thread 2. 
 
 \section{Task 6:}
 
