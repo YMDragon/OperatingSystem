@@ -199,8 +199,10 @@ public class KThread {
 
         currentThread.status = statusFinished;
 
-        if (currentThread.joinThread != null)
+        if (currentThread.joinThread != null) {
+            currentThread.joinQueue.nextThread();
             currentThread.joinThread.ready();
+        }
 
         sleep();
     }
@@ -289,7 +291,10 @@ public class KThread {
         boolean initStatus = Machine.interrupt().disable();
 
         Lib.assertTrue(joinThread == null);
+        joinQueue = ThreadedKernel.scheduler.newThreadQueue(true);
         joinThread = currentThread;
+        joinQueue.acquire(this);
+        joinQueue.waitForAccess(currentThread);
         currentThread.sleep();
 
         Machine.interrupt().restore(initStatus);
@@ -436,7 +441,7 @@ public class KThread {
         thread2.join();
     }
 
-    static int thread3Fin = 0;
+    static int thread1Fin = 0;
     static Lock lock = new Lock();
 
     public static void selfTestScheduler() {
@@ -449,14 +454,14 @@ public class KThread {
         });
         KThread thread2 = new KThread(new Runnable() {
             public void run() {
-                if (thread3Fin == 0)
+                if (thread1Fin == 0)
                     System.out.println("error");
             }
         });
         KThread thread3 = new KThread(new Runnable() {
             public void run() {
                 lock.acquire();
-                thread3Fin = 1;
+                thread1Fin = 1;
                 KThread.yield();
                 lock.release();
             }
@@ -515,4 +520,5 @@ public class KThread {
     private static KThread idleThread = null;
 
     private KThread joinThread = null;
+    private ThreadQueue joinQueue = null;
 }
