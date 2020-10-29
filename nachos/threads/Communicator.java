@@ -19,6 +19,7 @@ public class Communicator {
     public Communicator() {
         waitSpeak = new Condition2(lock);
         waitListen = new Condition2(lock);
+        hasWord = false;
     }
 
     /**
@@ -34,17 +35,12 @@ public class Communicator {
     public void speak(int word) {
         lock.acquire();
 
-        numSpeak += 1;
-        wordQueue.offer(word);
+        while(hasWord)
+            waitSpeak.sleep();
 
-        if(numListen > 0)
-            waitListen.wake();
-        else{
-            while(numListen == 0)
-                waitSpeak.sleep();
-        }
-
-        numListen -= 1;
+        hasWord = true;
+        wordTrans = word;
+        waitListen.wake();
 
         lock.release();
     }
@@ -58,18 +54,13 @@ public class Communicator {
     public int listen() {
         lock.acquire();
 
-        numListen += 1;
-
-        if(numSpeak > 0)
-            waitSpeak.wake();
-        else{
-            while(numSpeak == 0)
-                waitListen.sleep();
-        }
+        while(!hasWord)
+            waitListen.sleep();
         
-        int word = wordQueue.remove();
-        numSpeak -= 1;
-
+        int word = wordTrans;
+        hasWord = false;
+        waitSpeak.wake();
+        
         lock.release();
         
         return word;
@@ -103,6 +94,6 @@ public class Communicator {
 
     private Condition2 waitSpeak, waitListen;
     private Lock lock = new Lock();
-    private int numSpeak, numListen;
-    private Queue<Integer> wordQueue = new LinkedList<Integer>();
+    private int wordTrans;
+    private boolean hasWord;
 }
