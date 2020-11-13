@@ -31,6 +31,8 @@ public class UserProcess {
         files = new OpenFile[maxFileNumber];
         files[0] = UserKernel.console.openForReading();
         files[1] = UserKernel.console.openForWriting();
+
+        processID = counter++;
     }
 
     /**
@@ -333,6 +335,8 @@ public class UserProcess {
      * Handle the halt() system call.
      */
     private int handleHalt() {
+        if (processID != 0)
+            return -1;
 
         Machine.halt();
 
@@ -494,7 +498,7 @@ public class UserProcess {
                 return handleUnlink(a0);
 
             default:
-                Lib.debug(dbgProcess, "Unknown syscall " + syscall);
+                Lib.debug(dbgP  cess, "Unknown syscall " + syscall);
                 Lib.assertNotReached("Unknown system call!");
         }
         return 0;
@@ -535,6 +539,10 @@ public class UserProcess {
 
     protected OpenFile[] files = null;
     static protected int maxFileNumber = 16;
+
+    /** ProcessID */
+    protected int processID;
+    protected static int counter = 0;
 
     /** The program being run by this process. */
     protected Coff coff;
