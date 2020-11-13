@@ -199,8 +199,8 @@ public class PriorityScheduler extends Scheduler {
 		 */
 		public boolean transferPriority;
 
-		private int effectivePriority = -1;
-		private ThreadState holdThread = null;
+		protected int effectivePriority = -1;
+		protected ThreadState holdThread = null;
 		protected LinkedList<ThreadState> waitQueue = new LinkedList<>();
 	}
 

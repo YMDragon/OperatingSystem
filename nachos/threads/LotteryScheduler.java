@@ -40,8 +40,62 @@ public class LotteryScheduler extends PriorityScheduler {
      *                         from waiting threads to the owning thread.
      * @return a new lottery thread queue.
      */
+    @Override
     public ThreadQueue newThreadQueue(boolean transferPriority) {
-        // implement me
-        return null;
+        return new LotteryQueue(transferPriority);
+    }
+
+    @Override
+    protected ThreadState getThreadState(KThread thread) {
+        if (thread.schedulingState == null)
+            thread.schedulingState = new LotteryThreadState(thread);
+
+        return (ThreadState) thread.schedulingState;
+    }
+
+    protected class LotteryQueue extends PriorityQueue {
+        LotteryQueue(boolean transferPriority) {
+            super(transferPriority);
+        }
+
+        @Override
+        protected ThreadState pickNextThread() {
+            int totalTicket = 0;
+            for (ThreadState threadState : waitingQueue)
+                totalTicket += threadState.getEffectivePriority();
+            int chosenTicket = Random.nextInt(totalTicket);
+            for (ThreadState threadState : waitingQueue)
+                if (chosenTicket < threadState.getEffectivePriority())
+                    return threadState;
+            return null;
+        }
+
+        @Override
+        public void updateEffectivePriority() {
+            int oldEffectivePriority = effectivePriority;
+            effectivePriority = 0;
+            for (ThreadState threadState : waitingQueue)
+                effectivePriority += threadState.getEffectivePriority();
+            if (oldEffectivePriority != effectivePriority && holdThread != null)
+                holdThread.updateEffectivePriority();
+        }
+    }
+
+    protected class LotteryThreadState extends ThreadState {
+        public LotteryThreadState(KThread thread) {
+            super(thread);
+        }
+
+        @Override
+        protected void updateEffectivePriority() {
+            int oldEffectivePriority = effectivePriority;
+            effectivePriority = priority;
+            for (PriorityQueue threadQueue : holdingQueue)
+                effectivePriority += threadQueue.getEffectivePriority();
+
+            if (oldEffectivePriority != effectivePriority)
+                for (PriorityQueue threadQueue : waitingQueue)
+                    threadQueue.updateEffectivePriority();
+        }
     }
 }
