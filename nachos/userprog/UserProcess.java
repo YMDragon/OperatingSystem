@@ -498,7 +498,7 @@ public class UserProcess {
                 return handleUnlink(a0);
 
             default:
-                Lib.debug(dbgP  cess, "Unknown syscall " + syscall);
+                Lib.debug(dbgProcess, "Unknown syscall " + syscall);
                 Lib.assertNotReached("Unknown system call!");
         }
         return 0;
