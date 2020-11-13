@@ -27,6 +27,10 @@ public class UserProcess {
         pageTable = new TranslationEntry[numPhysPages];
         for (int i = 0; i < numPhysPages; i++)
             pageTable[i] = new TranslationEntry(i, i, true, false, false, false);
+
+        files = new OpenFile[maxFileNumber];
+        files[0] = UserKernel.console.openForReading();
+        files[1] = UserKernel.console.openForWriting();
     }
 
     /**
@@ -336,6 +340,72 @@ public class UserProcess {
         return 0;
     }
 
+    private int handleCreate(int vaddr) {
+        String name = readVirtualMemoryString(vaddr, 256);
+        int fd = getAvailIndex();
+        if (fd == -1 || name == null)
+            return -1;
+        OpenFile file = UserKernel.fileSystem.open(name, true);
+        if (file == null)
+            return -1;
+        files[fd] = file;
+        return fd;
+    }
+
+    private int handleOpen(int vaddr) {
+        String name = readVirtualMemoryString(vaddr, 256);
+        int fd = getAvailIndex();
+        if (fd == -1 || name == null)
+            return -1;
+        OpenFile file = UserKernel.fileSystem.open(name, false);
+        if (file == null)
+            return -1;
+        files[fd] = file;
+        return fd;
+    }
+
+    private int handleRead(int fd, int vaddr, int size) {
+        if (fd < 0 || fd > maxFileNumber || files[fd] == null)
+            return -1;
+        OpenFile file = files[fd];
+        byte[] data = new byte[size];
+        int len = file.read(bytes, 0, size);
+        if (len == -1)
+            return -1;
+        len = writeVirtualMemory(vaddr, data);
+        return len;
+    }
+
+    private int handleWrite(int fd, int vaddr, int size) {
+        if (fd < 0 || fd > maxFileNumber || files[fd] == null)
+            return -1;
+        OpenFile file = files[fd];
+        byte[] data = new byte[size];
+        int len = readVirtualMemory(vaddr, data);
+        len = file.write(bytes, 0, size);
+        if (len != 0 && len != size)
+            return -1;
+        return len;
+    }
+
+    private int handleClose(int fd) {
+        if (fd < 0 || fd > maxFileNumber || files[fd] == null)
+            return -1;
+        OpenFile file = files[fd];
+        file.close();
+        files[fd] = null;
+        return 0;
+    }
+
+    private int handleUnlink(int vaddr) {
+        String name = readVirtualMemoryString(vaddr, 256);
+        if (name == null)
+            return -1;
+        if (UserKernel.fileSystem.remove(name) == false)
+            return -1;
+        return 0;
+    }
+
     private static final int syscallHalt = 0, syscallExit = 1, syscallExec = 2, syscallJoin = 3, syscallCreate = 4,
             syscallOpen = 5, syscallRead = 6, syscallWrite = 7, syscallClose = 8, syscallUnlink = 9;
 
@@ -405,6 +475,24 @@ public class UserProcess {
             case syscallHalt:
                 return handleHalt();
 
+            case syscallCreate:
+                return handleCreate(a0);
+
+            case syscallOpen:
+                return handleOpen(a0);
+
+            case syscallRead:
+                return handleRead(a0, a1, a2);
+
+            case syscallWrite:
+                return handleWrite(a0, a1, a2);
+
+            case syscallClose:
+                return handleClose(a0);
+
+            case syscallUnlink:
+                return handleUnlink(a0);
+
             default:
                 Lib.debug(dbgProcess, "Unknown syscall " + syscall);
                 Lib.assertNotReached("Unknown system call!");
@@ -436,6 +524,17 @@ public class UserProcess {
                 Lib.assertNotReached("Unexpected exception");
         }
     }
+
+    /** FileDescriptor */
+    protected int getAvailIndex() {
+        for (int i = 2; i < maxFileNumber; i++)
+            if (files[i] == null)
+                return i;
+        return -1;
+    }
+
+    protected OpenFile[] files = null;
+    static protected int maxFileNumber = 16;
 
     /** The program being run by this process. */
     protected Coff coff;
