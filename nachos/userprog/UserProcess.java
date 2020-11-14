@@ -5,6 +5,8 @@ import nachos.threads.*;
 import nachos.userprog.*;
 
 import java.io.EOFException;
+import java.util.LinkedList;
+import java.util.HashMap;
 
 /**
  * Encapsulates the state of a user process that is not contained in its user
@@ -33,6 +35,10 @@ public class UserProcess {
         files[1] = UserKernel.console.openForWriting();
 
         processID = counter++;
+
+        parentProcess = null;
+        childProcesses = new LinkedList<UserProcess>();
+        childProcessesStatus = new HashMap<Integer, Integer>();
     }
 
     /**
@@ -57,7 +63,8 @@ public class UserProcess {
         if (!load(name, args))
             return false;
 
-        new UThread(this).setName(name).fork();
+        thread = (UThread)(new UThread(this).setName(name));
+        thread.fork();
 
         return true;
     }
@@ -133,6 +140,14 @@ public class UserProcess {
         Lib.assertTrue(offset >= 0 && length >= 0 && offset + length <= data.length);
 
         byte[] memory = Machine.processor().getMemory();
+
+        if (numPages == 0){
+            return 0;
+        }
+
+        if (vaddr < 0 || vaddr + length - 1 > Machine.processor().makeAddress(numPages - 1, pageSize - 1)){
+            return 0;
+        }
 
         // for now, just assume that virtual addresses equal physical addresses
         if (vaddr < 0 || vaddr >= memory.length)
@@ -344,6 +359,80 @@ public class UserProcess {
         return 0;
     }
 
+    private int handleExit(int status){
+        int numChild = childProcesses.size();
+        for(int i = 0; i < numChild; i++){
+            UserProcess childProcess = childProcesses.removeFirst();
+            childProcess.parentProcess = null;
+        }
+        if (parentProcess != null){
+            parentProcess.childProcessesStatus.put(processID, status);
+        }
+        unloadSections();
+        if (processID == 0){
+            Kernel.kernel.terminate();
+        }
+        else{
+            UThread.finish();
+        }
+        return 0;
+    }
+
+    private int handleExec(int fileAddr, int argc, int argvAddr){
+        if(fileAddr < 0 || argc < 0 || argvAddr < 0)
+            return -1;
+        String filename = readVirtualMemoryString(fileAddr, 256);
+        if(filename == null)
+            return -1;
+        if(filename.contains(".coff") == false)
+            return -1;
+        
+        String[] argv = new String[argc];
+        for(int i = 0; i < argc; i++){
+            byte[] addrBuffer = new byte[4];
+            int length = readVirtualMemory(argvAddr + i * 4, addrBuffer);
+            if(length != 4)
+                return -1;
+            int addr = Lib.bytesToInt(addrBuffer, 0);
+            String curargv = readVirtualMemoryString(addr, 256);
+            if(curargv == null)
+                return -1;
+            argv[i] = curargv; 
+        }
+
+        UserProcess childProcess = UserProcess.newUserProcess();
+        this.childProcesses.add(childProcess);
+        childProcess.parentProcess = this;
+        if(childProcess.execute(filename, argv) == false)
+            return -1;
+        return childProcess.processID;
+    }
+
+    private int handleJoin(int processID, int statusAddr){
+        if (processID < 0 || statusAddr < 0)
+            return -1;
+        UserProcess child = null;
+        for(UserProcess childProcess : childProcesses){
+            if (childProcess.processID == processID){
+                child = childProcess;
+            }
+        }
+        if(child == null)
+            return -1;
+        child.thread.join();
+
+        childProcesses.remove(child);
+        child.parentProcess = null;
+
+        int status = childProcessesStatus.get(child.processID);
+        byte[] statusBuffer = Lib.bytesFromInt(status);
+        writeVirtualMemory(statusAddr, statusBuffer);
+        if (child.unexpect)
+            return 0;
+        else
+            return 1;
+    }
+
     private int handleCreate(int vaddr) {
         String name = readVirtualMemoryString(vaddr, 256);
         int fd = getAvailIndex();
@@ -479,6 +568,15 @@ public class UserProcess {
             case syscallHalt:
                 return handleHalt();
 
+            case syscallExit:
+                return handleExit(a0);
+            
+            case syscallExec:
+                return handleExec(a0, a1, a2);
+            
+            case syscallJoin:
+                return handleJoin(a0, a1);
+
             case syscallCreate:
                 return handleCreate(a0);
 
@@ -524,6 +622,7 @@ public class UserProcess {
                 break;
 
             default:
+                unexpect = true;
                 Lib.debug(dbgProcess, "Unexpected exception: " + Processor.exceptionNames[cause]);
                 Lib.assertNotReached("Unexpected exception");
         }
@@ -560,4 +659,11 @@ public class UserProcess {
 
     private static final int pageSize = Processor.pageSize;
     private static final char dbgProcess = 'a';
+    
+    // task3
+    protected LinkedList<UserProcess> childProcesses;
+    protected UserProcess parentProcess;
+    protected HashMap<Integer, Integer> childProcessesStatus;
+    protected UThread thread;
+    protected boolean unexpect = false;
 }
