@@ -373,7 +373,7 @@ public class UserProcess {
             return -1;
         OpenFile file = files[fd];
         byte[] data = new byte[size];
-        int len = file.read(bytes, 0, size);
+        int len = file.read(data, 0, size);
         if (len == -1)
             return -1;
         len = writeVirtualMemory(vaddr, data);
@@ -386,7 +386,7 @@ public class UserProcess {
         OpenFile file = files[fd];
         byte[] data = new byte[size];
         int len = readVirtualMemory(vaddr, data);
-        len = file.write(bytes, 0, size);
+        len = file.write(data, 0, size);
         if (len != 0 && len != size)
             return -1;
         return len;

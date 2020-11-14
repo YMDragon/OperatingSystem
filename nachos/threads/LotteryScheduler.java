@@ -5,6 +5,7 @@ import nachos.machine.*;
 import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Random;
 
 /**
  * A scheduler that chooses threads using a lottery.
@@ -61,10 +62,11 @@ public class LotteryScheduler extends PriorityScheduler {
         @Override
         protected ThreadState pickNextThread() {
             int totalTicket = 0;
-            for (ThreadState threadState : waitingQueue)
+            for (ThreadState threadState : waitQueue)
                 totalTicket += threadState.getEffectivePriority();
-            int chosenTicket = Random.nextInt(totalTicket);
-            for (ThreadState threadState : waitingQueue)
+            Random random = new Random();
+            int chosenTicket = random.nextInt(totalTicket);
+            for (ThreadState threadState : waitQueue)
                 if (chosenTicket < threadState.getEffectivePriority())
                     return threadState;
             return null;
@@ -74,7 +76,7 @@ public class LotteryScheduler extends PriorityScheduler {
         public void updateEffectivePriority() {
             int oldEffectivePriority = effectivePriority;
             effectivePriority = 0;
-            for (ThreadState threadState : waitingQueue)
+            for (ThreadState threadState : waitQueue)
                 effectivePriority += threadState.getEffectivePriority();
             if (oldEffectivePriority != effectivePriority && holdThread != null)
                 holdThread.updateEffectivePriority();
