@@ -265,12 +265,17 @@ public class UserProcess {
 
         // program counter initially points at the program entry point
         initialPC = coff.getEntryPoint();
-
+        for (int i = 0; i < stackPages; i++){
+            int ppn = UserKernel.alloPage();
+            pageTable[numPages + i] = new TranslationEntry(numPages + i, ppn, true, false, false, false);
+        }
         // next comes the stack; stack pointer initially points to top of it
         numPages += stackPages;
         initialSP = numPages * pageSize;
 
         // and finally reserve 1 page for arguments
+        int ppn = UserKernel.alloPage();
+        pageTable[numPages] = new TranslationEntry(numPages, ppn, true, false, false, false);
         numPages++;
 
         if (!loadSections())

@@ -113,7 +113,7 @@ public class UserKernel extends ThreadedKernel {
         pageLock.acquire();
         int page = pagePool.poll();
         pageLock.release();
-        Lib.debug(dbgProcess, "ppn = " + page);
+        //Lib.debug(dbgProcess, "ppn = " + page);
         return page;
     }
 
