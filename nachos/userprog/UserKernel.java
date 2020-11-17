@@ -113,6 +113,7 @@ public class UserKernel extends ThreadedKernel {
         pageLock.acquire();
         int page = pagePool.poll();
         pageLock.release();
+        Lib.debug(dbgProcess, "ppn = " + page);
         return page;
     }
 
@@ -138,4 +139,6 @@ public class UserKernel extends ThreadedKernel {
     // Task2
     private static Lock pageLock;
     private static LinkedList<Integer> pagePool;
+    
+    private static final char dbgProcess = 'a';
 }

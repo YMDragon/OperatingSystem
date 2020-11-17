@@ -149,11 +149,13 @@ public class UserProcess {
         }
         for(int i = 0; i < length; i++){
             TranslationEntry page = pageTable[Machine.processor().pageFromAddress(vaddr + i)];
+            if(!page.valid)break;
             page.used = true;
             int paddr = Machine.processor().makeAddress(page.ppn, (vaddr + i) % pageSize);
             data[offset + i] = memory[paddr];
             amount += 1;
         }
+        //Lib.debug(dbgProcess, "read amout = " + amount);
         return amount;
     }
 
@@ -197,11 +199,13 @@ public class UserProcess {
         
         for(int i = 0; i < length; i++){
             TranslationEntry page = pageTable[Machine.processor().pageFromAddress(vaddr + i)];
+            if(!page.valid || page.readOnly)break;
             page.used = true;
             int paddr = Machine.processor().makeAddress(page.ppn, (vaddr + i) % pageSize);
             memory[paddr] = data[offset + i];
             amount += 1;
         }
+        //Lib.debug(dbgProcess, "write amout = " + amount);
         return amount;
 
     }
@@ -323,7 +327,7 @@ public class UserProcess {
                 section.loadPage(i, ppn);
             }
         }
-
+        //Lib.debug(dbgProcess, "Success");
         return true;
     }
 
@@ -479,7 +483,8 @@ public class UserProcess {
         OpenFile file = files[fd];
         byte[] data = new byte[size];
         int len = file.read(data, 0, size);
-        if (len == -1)
+        //Lib.debug(dbgProcess, "len = " + len);
+        if (len == -1 || len == 0)
             return -1;
         len = writeVirtualMemory(vaddr, data);
         return len;
