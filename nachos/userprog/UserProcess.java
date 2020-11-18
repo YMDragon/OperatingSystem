@@ -265,6 +265,9 @@ public class UserProcess {
         }
 
         // program counter initially points at the program entry point
+        if(numPages + stackPages + 1 > UserKernel.restPages())
+            return false;
+
         initialPC = coff.getEntryPoint();
         for (int i = 0; i < stackPages; i++) {
             int ppn = UserKernel.alloPage();
