@@ -63,7 +63,7 @@ public class UserProcess {
         if (!load(name, args))
             return false;
 
-        thread = (UThread)(new UThread(this).setName(name));
+        thread = (UThread) (new UThread(this).setName(name));
         thread.fork();
 
         return true;
@@ -144,18 +144,19 @@ public class UserProcess {
         int lastaddr = vaddr + length - 1;
         int amount = 0;
 
-        if (vaddr < 0 || lastaddr > Machine.processor().makeAddress(numPages - 1, pageSize - 1)){
+        if (vaddr < 0 || lastaddr > Machine.processor().makeAddress(numPages - 1, pageSize - 1)) {
             return 0;
         }
-        for(int i = 0; i < length; i++){
+        for (int i = 0; i < length; i++) {
             TranslationEntry page = pageTable[Machine.processor().pageFromAddress(vaddr + i)];
-            if(!page.valid)break;
+            if (!page.valid)
+                break;
             page.used = true;
             int paddr = Machine.processor().makeAddress(page.ppn, (vaddr + i) % pageSize);
             data[offset + i] = memory[paddr];
             amount += 1;
         }
-        //Lib.debug(dbgProcess, "read amout = " + amount);
+        // Lib.debug(dbgProcess, "read amout = " + amount);
         return amount;
     }
 
@@ -189,23 +190,23 @@ public class UserProcess {
 
         byte[] memory = Machine.processor().getMemory();
 
-        
         int lastaddr = vaddr + length - 1;
         int amount = 0;
-        
-        if (vaddr < 0 || lastaddr > Machine.processor().makeAddress(numPages - 1, pageSize - 1)){
+
+        if (vaddr < 0 || lastaddr > Machine.processor().makeAddress(numPages - 1, pageSize - 1)) {
             return 0;
         }
-        
-        for(int i = 0; i < length; i++){
+
+        for (int i = 0; i < length; i++) {
             TranslationEntry page = pageTable[Machine.processor().pageFromAddress(vaddr + i)];
-            if(!page.valid || page.readOnly)break;
+            if (!page.valid || page.readOnly)
+                break;
             page.used = true;
             int paddr = Machine.processor().makeAddress(page.ppn, (vaddr + i) % pageSize);
             memory[paddr] = data[offset + i];
             amount += 1;
         }
-        //Lib.debug(dbgProcess, "write amout = " + amount);
+        // Lib.debug(dbgProcess, "write amout = " + amount);
         return amount;
 
     }
@@ -265,7 +266,7 @@ public class UserProcess {
 
         // program counter initially points at the program entry point
         initialPC = coff.getEntryPoint();
-        for (int i = 0; i < stackPages; i++){
+        for (int i = 0; i < stackPages; i++) {
             int ppn = UserKernel.alloPage();
             pageTable[numPages + i] = new TranslationEntry(numPages + i, ppn, true, false, false, false);
         }
@@ -332,7 +333,7 @@ public class UserProcess {
                 section.loadPage(i, ppn);
             }
         }
-        //Lib.debug(dbgProcess, "Success");
+        // Lib.debug(dbgProcess, "Success");
         return true;
     }
 
@@ -340,10 +341,10 @@ public class UserProcess {
      * Release any resources allocated by <tt>loadSections()</tt>.
      */
     protected void unloadSections() {
-        for (int i = 0; i < numPages; i++){
+        for (int i = 0; i < numPages; i++) {
             UserKernel.freePage(pageTable[i].ppn);
         }
-        for (int i = 0; i < maxFileNumber; i++){
+        for (int i = 0; i < maxFileNumber; i++) {
             handleClose(i);
         }
     }
@@ -384,65 +385,64 @@ public class UserProcess {
         return 0;
     }
 
-    private int handleExit(int status){
+    private int handleExit(int status) {
         int numChild = childProcesses.size();
-        for(int i = 0; i < numChild; i++){
+        for (int i = 0; i < numChild; i++) {
             UserProcess childProcess = childProcesses.removeFirst();
             childProcess.parentProcess = null;
         }
-        if (parentProcess != null){
+        if (parentProcess != null) {
             parentProcess.childProcessesStatus.put(processID, status);
         }
         unloadSections();
-        if (processID == 0){
+        if (processID == 0) {
             Kernel.kernel.terminate();
-        }
-        else{
+        } else {
             UThread.finish();
         }
         return 0;
     }
 
-    private int handleExec(int fileAddr, int argc, int argvAddr){
-        if(fileAddr < 0 || argc < 0 || argvAddr < 0)
+    private int handleExec(int fileAddr, int argc, int argvAddr) {
+        if (fileAddr < 0 || argc < 0 || argvAddr < 0)
             return -1;
         String filename = readVirtualMemoryString(fileAddr, 256);
-        if(filename == null)
+        if (filename == null)
             return -1;
-        if(filename.contains(".coff") == false)
+        if (filename.contains(".coff") == false)
             return -1;
-        
+
         String[] argv = new String[argc];
-        for(int i = 0; i < argc; i++){
+        for (int i = 0; i < argc; i++) {
             byte[] addrBuffer = new byte[4];
             int length = readVirtualMemory(argvAddr + i * 4, addrBuffer);
-            if(length != 4)
+            if (length != 4)
                 return -1;
             int addr = Lib.bytesToInt(addrBuffer, 0);
             String curargv = readVirtualMemoryString(addr, 256);
-            if(curargv == null)
+            if (curargv == null)
                 return -1;
-            argv[i] = curargv; 
+            argv[i] = curargv;
         }
 
         UserProcess childProcess = UserProcess.newUserProcess();
         this.childProcesses.add(childProcess);
         childProcess.parentProcess = this;
-        if(childProcess.execute(filename, argv) == false)
+        if (childProcess.execute(filename, argv) == false)
             return -1;
         return childProcess.processID;
     }
 
-    private int handleJoin(int processID, int statusAddr){
+    private int handleJoin(int processID, int statusAddr) {
         if (processID < 0 || statusAddr < 0)
             return -1;
         UserProcess child = null;
-        for(UserProcess childProcess : childProcesses){
-            if (childProcess.processID == processID){
+        for (UserProcess childProcess : childProcesses) {
+            if (childProcess.processID == processID) {
                 child = childProcess;
             }
         }
-        if(child == null)
+        if (child == null)
             return -1;
         child.thread.join();
 
@@ -488,10 +488,9 @@ public class UserProcess {
         OpenFile file = files[fd];
         byte[] data = new byte[size];
         int len = file.read(data, 0, size);
-        //Lib.debug(dbgProcess, "len = " + len);
         if (len == -1 || len == 0)
             return -1;
-        len = writeVirtualMemory(vaddr, data);
+        len = writeVirtualMemory(vaddr, data, 0, len);
         return len;
     }
 
@@ -501,7 +500,7 @@ public class UserProcess {
         OpenFile file = files[fd];
         byte[] data = new byte[size];
         int len = readVirtualMemory(vaddr, data);
-        len = file.write(data, 0, size);
+        len = file.write(data, 0, len);
         if (len != 0 && len != size)
             return -1;
         return len;
@@ -596,10 +595,10 @@ public class UserProcess {
 
             case syscallExit:
                 return handleExit(a0);
-            
+
             case syscallExec:
                 return handleExec(a0, a1, a2);
-            
+
             case syscallJoin:
                 return handleJoin(a0, a1);
 
@@ -685,7 +684,7 @@ public class UserProcess {
 
     private static final int pageSize = Processor.pageSize;
     private static final char dbgProcess = 'a';
-    
+
     // task3
     protected LinkedList<UserProcess> childProcesses;
     protected UserProcess parentProcess;
