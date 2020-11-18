@@ -57,6 +57,7 @@ public class LotteryScheduler extends PriorityScheduler {
     protected class LotteryQueue extends PriorityQueue {
         LotteryQueue(boolean transferPriority) {
             super(transferPriority);
+            effectivePriority = 0;
         }
 
         @Override
@@ -64,11 +65,15 @@ public class LotteryScheduler extends PriorityScheduler {
             int totalTicket = 0;
             for (ThreadState threadState : waitQueue)
                 totalTicket += threadState.getEffectivePriority();
-            Random random = new Random();
-            int chosenTicket = random.nextInt(totalTicket);
-            for (ThreadState threadState : waitQueue)
-                if (chosenTicket < threadState.getEffectivePriority())
-                    return threadState;
+            if (totalTicket > 0) {
+                Random random = new Random();
+                int chosenTicket = random.nextInt(totalTicket);
+                for (ThreadState threadState : waitQueue) {
+                    if (chosenTicket < threadState.getEffectivePriority())
+                        return threadState;
+                    chosenTicket -= threadState.getEffectivePriority();
+                }
+            }
             return null;
         }
 
@@ -93,8 +98,8 @@ public class LotteryScheduler extends PriorityScheduler {
             int oldEffectivePriority = effectivePriority;
             effectivePriority = priority;
             for (PriorityQueue threadQueue : holdingQueue)
-                effectivePriority += threadQueue.getEffectivePriority();
-
+                if (threadQueue.transferPriority)
+                    effectivePriority += threadQueue.getEffectivePriority();
             if (oldEffectivePriority != effectivePriority)
                 for (PriorityQueue threadQueue : waitingQueue)
                     threadQueue.updateEffectivePriority();

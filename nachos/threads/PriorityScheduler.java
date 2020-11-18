@@ -266,6 +266,8 @@ public class PriorityScheduler extends Scheduler {
 		 * @see nachos.threads.ThreadQueue#waitForAccess
 		 */
 		public void waitForAccess(PriorityQueue waitQueue) {
+			if (waitQueue.holdThread == this)
+				waitQueue.holdThread = null;
 			waitQueue.waitQueue.offer(this);
 			waitQueue.updateEffectivePriority();
 
