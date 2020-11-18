@@ -265,8 +265,10 @@ public class UserProcess {
         }
 
         // program counter initially points at the program entry point
-        if(numPages + stackPages + 1 > UserKernel.restPages())
+        if(numPages + stackPages + 1 > UserKernel.restPages()){
+            Lib.debug(dbgProcess, "Not fit in physical memory");
             return false;
+        }
 
         initialPC = coff.getEntryPoint();
         for (int i = 0; i < stackPages; i++) {
