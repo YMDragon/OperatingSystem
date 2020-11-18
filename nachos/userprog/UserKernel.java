@@ -110,8 +110,9 @@ public class UserKernel extends ThreadedKernel {
     }
 
     public static int alloPage(){
+        int page;
         pageLock.acquire();
-        int page = pagePool.poll();
+        page = pagePool.poll();
         pageLock.release();
         //Lib.debug(dbgProcess, "ppn = " + page);
         return page;
@@ -121,6 +122,13 @@ public class UserKernel extends ThreadedKernel {
         pageLock.acquire();
         pagePool.add(page);
         pageLock.release();
+    }
+
+    public static int restPages(){
+        pageLock.acquire();
+        int ans = pagePool.size();
+        pageLock.release();
+        return ans;
     }
 
     /**
