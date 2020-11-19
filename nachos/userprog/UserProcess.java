@@ -7,6 +7,7 @@ import nachos.userprog.*;
 import java.io.EOFException;
 import java.util.LinkedList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Encapsulates the state of a user process that is not contained in its user
@@ -35,6 +36,9 @@ public class UserProcess {
         files[1] = UserKernel.console.openForWriting();
 
         processID = counter++;
+
+        if (processID == 0)
+            deletedFiles = new HashSet<String>();
 
         parentProcess = null;
         childProcesses = new LinkedList<UserProcess>();
@@ -265,7 +269,7 @@ public class UserProcess {
         }
 
         // program counter initially points at the program entry point
-        if(numPages + stackPages + 1 > UserKernel.restPages()){
+        if (numPages + stackPages + 1 > UserKernel.restPages()) {
             Lib.debug(dbgProcess, "Not fit in physical memory");
             return false;
         }
@@ -466,7 +470,7 @@ public class UserProcess {
     private int handleCreate(int vaddr) {
         String name = readVirtualMemoryString(vaddr, 256);
         int fd = getAvailIndex();
-        if (fd == -1 || name == null)
+        if (fd == -1 || name == null || deletedFiles.contains(name))
             return -1;
         OpenFile file = UserKernel.fileSystem.open(name, true);
         if (file == null)
@@ -478,7 +482,7 @@ public class UserProcess {
     private int handleOpen(int vaddr) {
         String name = readVirtualMemoryString(vaddr, 256);
         int fd = getAvailIndex();
-        if (fd == -1 || name == null)
+        if (fd == -1 || name == null || deletedFiles.contains(name))
             return -1;
         OpenFile file = UserKernel.fileSystem.open(name, false);
         if (file == null)
@@ -517,6 +521,10 @@ public class UserProcess {
         OpenFile file = files[fd];
         file.close();
         files[fd] = null;
+        String name = file.getName();
+        if (deletedFiles.contains(name))
+            if (UserKernel.fileSystem.remove(name) == true)
+                deletedFiles.remove(name);
         return 0;
     }
 
@@ -524,8 +532,10 @@ public class UserProcess {
         String name = readVirtualMemoryString(vaddr, 256);
         if (name == null)
             return -1;
-        if (UserKernel.fileSystem.remove(name) == false)
+        if (UserKernel.fileSystem.remove(name) == false) {
+            deletedFiles.add(name);
             return -1;
+        }
         return 0;
     }
 
@@ -667,7 +677,8 @@ public class UserProcess {
     }
 
     protected OpenFile[] files = null;
-    static protected int maxFileNumber = 16;
+    protected static int maxFileNumber = 16;
+    protected static HashSet<String> deletedFiles = null;
 
     /** ProcessID */
     protected int processID;
