@@ -148,8 +148,8 @@ public class UserProcess {
         int lastaddr = vaddr + length - 1;
         int amount = 0;
 
-        Lib.debug(dbgProcess, "addr = " + lastaddr);
-        Lib.debug(dbgProcess, "threshold = " + Machine.processor().makeAddress(numPages - 1, pageSize - 1));
+        //Lib.debug(dbgProcess, "addr = " + lastaddr);
+        //Lib.debug(dbgProcess, "threshold = " + Machine.processor().makeAddress(numPages - 1, pageSize - 1));
 
         if (vaddr < 0 || lastaddr > Machine.processor().makeAddress(numPages - 1, pageSize - 1)) {
             Lib.debug(dbgProcess, "Virtual memory not in page table");
@@ -201,8 +201,8 @@ public class UserProcess {
         int lastaddr = vaddr + length - 1;
         int amount = 0;
 
-        Lib.debug(dbgProcess, "addr = " + lastaddr);
-        Lib.debug(dbgProcess, "threshold = " + Machine.processor().makeAddress(numPages - 1, pageSize - 1));
+        //Lib.debug(dbgProcess, "addr = " + lastaddr);
+        //Lib.debug(dbgProcess, "threshold = " + Machine.processor().makeAddress(numPages - 1, pageSize - 1));
 
         if (vaddr < 0 || lastaddr > Machine.processor().makeAddress(numPages - 1, pageSize - 1)) {
             Lib.debug(dbgProcess, "Virtual memory not in page table");
@@ -457,7 +457,7 @@ public class UserProcess {
 
     private int handleJoin(int processID, int statusAddr) {
         if (processID < 0 || statusAddr < 0){
-            Lib.debug(dbgProcess, "Not a Process");
+            Lib.debug(dbgProcess, "Join failed, not a Process");
             return -1;
         }
         UserProcess child = null;
@@ -467,7 +467,7 @@ public class UserProcess {
             }
         }
         if (child == null){
-            Lib.debug(dbgProcess, "Not a child Process");
+            Lib.debug(dbgProcess, "Join failed, not a child Process");
             return -1;
         }
         child.thread.join();
