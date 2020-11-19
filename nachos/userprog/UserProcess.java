@@ -149,6 +149,7 @@ public class UserProcess {
         int amount = 0;
 
         if (vaddr < 0 || lastaddr > Machine.processor().makeAddress(numPages - 1, pageSize - 1)) {
+            Lib.debug(dbgProcess, "Virtual memory not in page table");
             return 0;
         }
         for (int i = 0; i < length; i++) {
@@ -198,6 +199,7 @@ public class UserProcess {
         int amount = 0;
 
         if (vaddr < 0 || lastaddr > Machine.processor().makeAddress(numPages - 1, pageSize - 1)) {
+            Lib.debug(dbgProcess, "Virtual memory not in page table");
             return 0;
         }
 
