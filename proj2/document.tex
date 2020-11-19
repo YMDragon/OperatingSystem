@@ -1,0 +1,181 @@
+% Modified based on Xiaoming Sun's template
+\documentclass[11pt]{article}
+\usepackage{amsmath,amsfonts,amsthm,amssymb}
+\usepackage{mathrsfs}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{extramarks}
+\usepackage{chngpage}
+\usepackage{soul,color}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{tikz}
+\usepackage[colorlinks]{hyperref}
+\newcommand{\Class}{Operating System}
+
+% Homework Specific Information. Change it to your own
+\newcommand{\Title}{Project 2 Document}
+
+% In case you need to adjust margins:
+\topmargin=-0.45in      %
+\evensidemargin=0in     %
+\oddsidemargin=0in      %
+\textwidth=6.5in        %
+\textheight=9.0in       %
+\headsep=0.25in         %
+
+% Setup the header and footer
+\pagestyle{fancy}                                                       %
+\chead{\Title}  %
+\rhead{\firstxmark}                                                     %
+\lfoot{\lastxmark}                                                      %
+\cfoot{}                                                                %
+\rfoot{Page\ \thepage\ of\ \protect\pageref{LastPage}}                          %
+\renewcommand\headrulewidth{0.4pt}                                      %
+\renewcommand\footrulewidth{0.4pt}                                      %
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Some tools
+\newcommand{\enterProblemHeader}[1]{\nobreak\extramarks{#1}{#1 continued on next page\ldots}\nobreak%
+                                    \nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak}%
+\newcommand{\exitProblemHeader}[1]{\nobreak\extramarks{#1 (continued)}{#1 continued on next page\ldots}\nobreak%
+                                   \nobreak\extramarks{#1}{}\nobreak}%
+
+\newcommand{\homeworkProblemName}{}%
+\newcounter{homeworkProblemCounter}%
+\newenvironment{homeworkProblem}[1][Problem \arabic{homeworkProblemCounter}]%
+  {\stepcounter{homeworkProblemCounter}%
+   \renewcommand{\homeworkProblemName}{#1}%
+   \section*{\homeworkProblemName}%
+   \enterProblemHeader{\homeworkProblemName}}%
+  {\exitProblemHeader{\homeworkProblemName}}%
+
+\newcommand{\homeworkSectionName}{}%
+\newlength{\homeworkSectionLabelLength}{}%
+\newenvironment{homeworkSection}[1]%
+  {% We put this space here to make sure we're not connected to the above.
+
+   \renewcommand{\homeworkSectionName}{#1}%
+   \settowidth{\homeworkSectionLabelLength}{\homeworkSectionName}%
+   \addtolength{\homeworkSectionLabelLength}{0.25in}%
+   \changetext{}{-\homeworkSectionLabelLength}{}{}{}%
+   \subsection*{\homeworkSectionName}%
+   \enterProblemHeader{\homeworkProblemName\ [\homeworkSectionName]}}%
+  {\enterProblemHeader{\homeworkProblemName}%
+
+   % We put the blank space above in order to make sure this margin
+   % change doesn't happen too soon.
+   \changetext{}{+\homeworkSectionLabelLength}{}{}{}}%
+
+\newcommand{\Answer}{\ \\\textbf{Answer:} }
+\newcommand{\Acknowledgement}[1]{\ \\{\bf Acknowledgement:} #1}
+
+ \def\ms#1{\mathscr{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Make title
+\title{\textmd{\bf \Class: \Title}}
+\date{\today}
+\author{Yao Class 18, Qianlan Yang, 2018011294, Maolong Yang, 2018011414}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newtheorem{theorem}{Theorem}
+
+\begin{document}
+\begin{spacing}{1.1}
+\maketitle \thispagestyle{empty}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin edit from here
+
+
+
+
+\iffalse
+
+\begin{figure}[h]%%图
+	\centering  %插入的图片居中表示
+	\includegraphics[width=0.7\linewidth]{image.jpg}  %插入的图，包括JPG,PN
+\end{figure}
+
+\fi
+
+All of these tests should be executed under shell.coff.
+
+\section{Test1: Simple file system test}
+
+This test is set to check whether the project can open and close file correctly, and the maximum number of files it can open.
+
+In this test, we try to open $20$ files, and write something to it, then close them.
+
+The result is that we can open $14$ files simultaneously, since there are maximum $16$ files and $stdin,stdout$, the result is correct. 
+
+
+\section{Test 2: Simple file system test}
+
+This test aims to test the correctness of open and close files and the time of it.
+
+In this test, we try to enumerate $1000$ times, each time we choose a file, if it is opened, we will close it, while if it is closed, we will open it.
+
+The result is what we expected, the opened file system is in cycle.
+
+\section{Test 3: Execute test}
+
+This test is to execute itself.
+
+In $F(n)$, it will execute a $F(n-1)$ and let itself become $F(n-1)$ when $n > 0$.
+
+In $n=2$ case, it create 4 threads in total, one $F(2)$(origin), one $F(1)$ and two $F(0)$. But we can't run fully when $n=3$ since we have no enough physical memory.  
+
+\section{Test 4: Segment fault test}
+
+This test is to test when memory access is not in the correct position, what will happen.
+
+We allocate an array of $20$ integers, and we will access from $-10$ to $30$.
+
+In this test, we find that, if we try to write something, it will lead to crash, if we only try to read from them, there won't be error. This is because that virtual memory system cannot distinguish stack and section memory, so we will write on stack which leads to error.
+
+\section{Test 5: Unlink test}
+
+This test is to test create, close and unlink.
+
+We create 14 files, then close and unlink them. We will repeat this some times.
+
+The result is what we expected, all operations are successfully finished.
+
+\section{Test 6: Divide zero test}
+
+This test aims to test divide zero. The result is overflow error, I think that we cannot handle it.
+
+\section{Test 7: Large virtual address test}
+
+In this test we try to access a extremely huge virtual memory. The result is that, if the address exceeds the memory size, it will lead to page fault, and if the address fit in physical memory, our project will ignore it.
+
+\section{Test 8: Process test}
+
+Test 8 and test 9 is set to test process actions between actions.
+
+In test 8, we have three programs, and we only need to use test8.coff to execute it. In the first program, it will exec the second process, and then join it. In the second process, it will first print something, then exec the third process, but it won't join the third process. The third process has a $while(1)$ so it will not end.
+
+We run this program and get result that, it finishes process $2$, then back to the shell controller. But if we print something in the $while(1)$ loop, we will find that process $3$ is still running. This means, when we finished process $2$, it left process $3$ still running with the main shell controller at the same time, which follows the requirements. 
+
+\section{Test 9: Process test 2}
+
+Test $9$ is almost the same as test $8$. At the end, we will join Process $3$ instead end Process $1$. But only the process's father can join it, so the behavior of this test should be the same as test $8$.
+
+\section{Github repo}
+
+\url{https://github.com/YMDragon/OperatingSystem}
+
+% End edit to here
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{spacing}
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
