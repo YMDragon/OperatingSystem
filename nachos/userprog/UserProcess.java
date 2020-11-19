@@ -271,6 +271,7 @@ public class UserProcess {
         // program counter initially points at the program entry point
         if (numPages + stackPages + 1 > UserKernel.restPages()) {
             Lib.debug(dbgProcess, "Not fit in physical memory");
+            coff.close();
             return false;
         }
 
@@ -290,6 +291,8 @@ public class UserProcess {
 
         if (!loadSections())
             return false;
+        
+
 
         // store arguments in last page
         int entryOffset = (numPages - 1) * pageSize;
@@ -307,6 +310,8 @@ public class UserProcess {
             Lib.assertTrue(writeVirtualMemory(stringOffset, new byte[] { 0 }) == 1);
             stringOffset += 1;
         }
+
+        coff.close();
 
         return true;
     }
