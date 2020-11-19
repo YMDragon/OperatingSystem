@@ -148,13 +148,16 @@ public class UserProcess {
         int lastaddr = vaddr + length - 1;
         int amount = 0;
 
+        Lib.debug(dbgProcess, "addr = " + lastaddr);
+        Lib.debug(dbgProcess, "threshold = " + Machine.processor().makeAddress(numPages - 1, pageSize - 1));
+
         if (vaddr < 0 || lastaddr > Machine.processor().makeAddress(numPages - 1, pageSize - 1)) {
             Lib.debug(dbgProcess, "Virtual memory not in page table");
             return 0;
         }
         for (int i = 0; i < length; i++) {
             TranslationEntry page = pageTable[Machine.processor().pageFromAddress(vaddr + i)];
-            if (!page.valid)
+            if (page == null || !page.valid)
                 break;
             page.used = true;
             int paddr = Machine.processor().makeAddress(page.ppn, (vaddr + i) % pageSize);
@@ -198,6 +201,9 @@ public class UserProcess {
         int lastaddr = vaddr + length - 1;
         int amount = 0;
 
+        Lib.debug(dbgProcess, "addr = " + lastaddr);
+        Lib.debug(dbgProcess, "threshold = " + Machine.processor().makeAddress(numPages - 1, pageSize - 1));
+
         if (vaddr < 0 || lastaddr > Machine.processor().makeAddress(numPages - 1, pageSize - 1)) {
             Lib.debug(dbgProcess, "Virtual memory not in page table");
             return 0;
@@ -205,7 +211,7 @@ public class UserProcess {
 
         for (int i = 0; i < length; i++) {
             TranslationEntry page = pageTable[Machine.processor().pageFromAddress(vaddr + i)];
-            if (!page.valid || page.readOnly)
+            if (page == null || !page.valid || page.readOnly)
                 break;
             page.used = true;
             int paddr = Machine.processor().makeAddress(page.ppn, (vaddr + i) % pageSize);
@@ -450,16 +456,20 @@ public class UserProcess {
     }
 
     private int handleJoin(int processID, int statusAddr) {
-        if (processID < 0 || statusAddr < 0)
+        if (processID < 0 || statusAddr < 0){
+            Lib.debug(dbgProcess, "Not a Process");
             return -1;
+        }
         UserProcess child = null;
         for (UserProcess childProcess : childProcesses) {
             if (childProcess.processID == processID) {
                 child = childProcess;
             }
         }
-        if (child == null)
+        if (child == null){
+            Lib.debug(dbgProcess, "Not a child Process");
             return -1;
+        }
         child.thread.join();
 
         childProcesses.remove(child);
