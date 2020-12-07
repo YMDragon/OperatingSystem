@@ -1,0 +1,583 @@
+Build started at 2020-12-05T21:42:51.676970
+Main binary: /usr/bin/python3
+Python system: Linux
+The Meson build system
+Version: 0.45.1
+Source dir: /home/group0/fuse-3.10.0
+Build dir: /home/group0/fuse-3.10.0/build
+Build type: native build
+Project name: libfuse3
+Sanity testing C compiler: cc
+Is cross compiler: False.
+Sanity check compiler command line: cc /home/group0/fuse-3.10.0/build/meson-private/sanitycheckc.c -o /home/group0/fuse-3.10.0/build/meson-private/sanitycheckc.exe
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /home/group0/fuse-3.10.0/build/meson-private/sanitycheckc.exe
+Native C compiler: cc (gcc 7.5.0 "cc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0")
+Build machine cpu family: x86_64
+Build machine cpu: x86_64
+Running compile:
+Working directory:  /tmp/tmpe11dowxa
+Command line:  cc /tmp/tmpe11dowxa/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpe11dowxa/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_fork || defined __stub___fork
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &fork;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "fork": YES
+Running compile:
+Working directory:  /tmp/tmpn9l4hhv8
+Command line:  cc /tmp/tmpn9l4hhv8/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpn9l4hhv8/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_fstatat || defined __stub___fstatat
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &fstatat;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "fstatat": YES
+Running compile:
+Working directory:  /tmp/tmpun_uje53
+Command line:  cc /tmp/tmpun_uje53/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpun_uje53/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_openat || defined __stub___openat
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &openat;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "openat": YES
+Running compile:
+Working directory:  /tmp/tmpitjdok9j
+Command line:  cc /tmp/tmpitjdok9j/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpitjdok9j/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_readlinkat || defined __stub___readlinkat
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &readlinkat;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "readlinkat": YES
+Running compile:
+Working directory:  /tmp/tmp2zejd_u5
+Command line:  cc /tmp/tmp2zejd_u5/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmp2zejd_u5/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_pipe2 || defined __stub___pipe2
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &pipe2;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "pipe2": YES
+Running compile:
+Working directory:  /tmp/tmpaggrrztu
+Command line:  cc /tmp/tmpaggrrztu/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpaggrrztu/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_splice || defined __stub___splice
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &splice;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "splice": YES
+Running compile:
+Working directory:  /tmp/tmp18xflsx8
+Command line:  cc /tmp/tmp18xflsx8/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmp18xflsx8/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_vmsplice || defined __stub___vmsplice
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &vmsplice;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "vmsplice": YES
+Running compile:
+Working directory:  /tmp/tmpwdzqb41q
+Command line:  cc /tmp/tmpwdzqb41q/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpwdzqb41q/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_posix_fallocate || defined __stub___posix_fallocate
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &posix_fallocate;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "posix_fallocate": YES
+Running compile:
+Working directory:  /tmp/tmpdb4t6as3
+Command line:  cc /tmp/tmpdb4t6as3/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpdb4t6as3/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_fdatasync || defined __stub___fdatasync
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &fdatasync;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "fdatasync": YES
+Running compile:
+Working directory:  /tmp/tmptxnsax7k
+Command line:  cc /tmp/tmptxnsax7k/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmptxnsax7k/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_utimensat || defined __stub___utimensat
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &utimensat;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "utimensat": YES
+Running compile:
+Working directory:  /tmp/tmpmwbq9awn
+Command line:  cc /tmp/tmpmwbq9awn/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpmwbq9awn/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_copy_file_range || defined __stub___copy_file_range
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &copy_file_range;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "copy_file_range": YES
+Running compile:
+Working directory:  /tmp/tmpx1zwoyv3
+Command line:  cc /tmp/tmpx1zwoyv3/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpx1zwoyv3/output.exe 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include <limits.h>
+
+        #if defined __stub_fallocate || defined __stub___fallocate
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &fallocate;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "fallocate": YES
+Running compile:
+Working directory:  /tmp/tmpk1u0llu0
+Command line:  cc /tmp/tmpk1u0llu0/testfile.c -O0 -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpk1u0llu0/output.exe 
+
+Code:
+ #include <sys/xattr.h>
+#include <limits.h>
+
+        #if defined __stub_setxattr || defined __stub___setxattr
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &setxattr;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "setxattr": YES
+Running compile:
+Working directory:  /tmp/tmpogkq1oo7
+Command line:  cc /tmp/tmpogkq1oo7/testfile.c -O0 -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpogkq1oo7/output.exe 
+
+Code:
+ #include <iconv.h>
+#include <limits.h>
+
+        #if defined __stub_iconv || defined __stub___iconv
+        fail fail fail this function is not going to work
+        #endif
+        
+int main() {
+            void *a = (void*) &iconv;
+            long b = (long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "iconv": YES
+Running compile:
+Working directory:  /tmp/tmpk88beolz
+Command line:  cc /tmp/tmpk88beolz/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -c -o /tmp/tmpk88beolz/output.obj 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+        void bar() {
+            struct stat foo;
+            foo.st_atim;
+
+        };
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking whether type "struct stat" has member "st_atim": YES
+Running compile:
+Working directory:  /tmp/tmpm4op4ptq
+Command line:  cc /tmp/tmpm4op4ptq/testfile.c -O0 -D_GNU_SOURCE -pipe -D_FILE_OFFSET_BITS=64 -c -o /tmp/tmpm4op4ptq/output.obj 
+
+Code:
+ 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+        void bar() {
+            struct stat foo;
+            foo.st_atimespec;
+
+        };
+Compiler stdout:
+ 
+Compiler stderr:
+ /tmp/tmpm4op4ptq/testfile.c: In function ‘bar’:
+/tmp/tmpm4op4ptq/testfile.c:12:17: error: ‘struct stat’ has no member named ‘st_atimespec’; did you mean ‘st_atim’?
+             foo.st_atimespec;
+                 ^~~~~~~~~~~~
+                 st_atim
+
+Checking whether type "struct stat" has member "st_atimespec": NO
+Configuring config.h using configuration
+Running compile:
+Working directory:  /tmp/tmpvwmuhs0n
+Command line:  cc /tmp/tmpvwmuhs0n/testfile.c -O0 -O0 -Werror=unused-result -pipe -D_FILE_OFFSET_BITS=64 -c -o /tmp/tmpvwmuhs0n/output.obj 
+
+Code:
+ 
+__attribute__((warn_unused_result)) int get_4() {
+    return 4;
+}
+int main(void) {
+    (void) get_4();
+    return 0;
+}
+Compiler stdout:
+ 
+Compiler stderr:
+ /tmp/tmpvwmuhs0n/testfile.c: In function ‘main’:
+/tmp/tmpvwmuhs0n/testfile.c:6:5: error: ignoring return value of ‘get_4’, declared with attribute warn_unused_result [-Werror=unused-result]
+     (void) get_4();
+     ^~~~~~~~~~~~~~
+cc1: some warnings being treated as errors
+
+Message: Compiler warns about unused result even when casting to void
+Running compile:
+Working directory:  /tmp/tmp9f72umwo
+Command line:  cc /tmp/tmp9f72umwo/testfile.c -O0 -O0 -c -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmp9f72umwo/output.obj 
+
+Code:
+ 
+#if defined __has_attribute
+# if !__has_attribute (symver)
+# error symver attribute not supported
+# endif
+#else
+#error __has_attribute not defined, assume we do not have symver
+#endif
+
+int main(void) {
+    return 0;
+}
+Compiler stdout:
+ 
+Compiler stderr:
+ /tmp/tmp9f72umwo/testfile.c:4:3: error: #error symver attribute not supported
+ # error symver attribute not supported
+   ^~~~~
+
+Message: Compiler does not support symver attribute
+Dependency threads found: YES
+Running compile:
+Working directory:  /tmp/tmpzjnd78l7
+Command line:  cc /tmp/tmpzjnd78l7/testfile.c -O0 -Wl,--start-group -liconv -Wl,--end-group -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpzjnd78l7/output.exe 
+
+Code:
+ int main(int argc, char **argv) { return 0; }
+Compiler stdout:
+ 
+Compiler stderr:
+ /usr/bin/ld: cannot find -liconv
+collect2: error: ld returned 1 exit status
+
+Library iconv found: NO
+Running compile:
+Working directory:  /tmp/tmpq0ev28_i
+Command line:  cc /tmp/tmpq0ev28_i/testfile.c -O0 -Wl,--start-group -ldl -Wl,--end-group -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmpq0ev28_i/output.exe 
+
+Code:
+ int main(int argc, char **argv) { return 0; }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Library dl found: YES
+Running compile:
+Working directory:  /tmp/tmp0_c1w6ev
+Command line:  cc /tmp/tmp0_c1w6ev/testfile.c -O0 -Wl,--start-group -lrt -Wl,--end-group -pipe -D_FILE_OFFSET_BITS=64 -o /tmp/tmp0_c1w6ev/output.exe 
+
+Code:
+ int main(int argc, char **argv) { return 0; }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Library rt found: YES
+Adding test "wrong_command".
+Found pkg-config: /usr/bin/pkg-config (0.29.1)
+Determining dependency 'udev' with pkg-config executable '/usr/bin/pkg-config'
+Native dependency udev found: YES 237
+Got pkgconfig variable udevdir : /lib/udev
+Program install_helper.sh found: YES (/home/group0/fuse-3.10.0/util/install_helper.sh)
+Sanity testing C++ compiler: c++
+Is cross compiler: False.
+Sanity check compiler command line: c++ /home/group0/fuse-3.10.0/build/meson-private/sanitycheckcpp.cc -o /home/group0/fuse-3.10.0/build/meson-private/sanitycheckcpp.exe
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /home/group0/fuse-3.10.0/build/meson-private/sanitycheckcpp.exe
+Native C++ compiler: c++ (gcc 7.5.0 "c++ (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0")
+Build targets in project: 26
+Found ninja-1.8.2 at /usr/bin/ninja
