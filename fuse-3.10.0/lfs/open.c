@@ -17,7 +17,7 @@ static struct options
 
 int o_open(const char *path, struct fuse_file_info *fi)
 {
-    logger(DEBUG, "OPEN, %s\n", path);
+    logger(DEBUG, "OPEN, %s%s, %p\n", prefix, path, fi);
     options.filename = strdup("hello");
     options.contents = strdup("Hello World!\n");
     if (strcmp(path + 1, options.filename) != 0)

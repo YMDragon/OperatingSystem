@@ -2,7 +2,7 @@
 
 int o_opendir(const char *path, struct fuse_file_info *fi)
 {
-  logger(DEBUG, "OPENDIR, %s\n", path);
+  logger(DEBUG, "OPENDIR, %s%s, %p\n", prefix, path, fi);
   logger(ERROR, "UNIMPLEMENTED: opendir, path: %s\n", path);
   return -1;
 }

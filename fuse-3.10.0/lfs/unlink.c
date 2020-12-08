@@ -2,7 +2,7 @@
 
 int o_unlink(const char *path)
 {
-    logger(DEBUG, "UNLINK, %s\n", path);
+    logger(DEBUG, "UNLINK, %s%s\n", prefix, path);
     logger(ERROR, "UNIMPLEMENTED: unlink, path: %s\n", path);
     return -1;
 }

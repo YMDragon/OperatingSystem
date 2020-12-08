@@ -17,7 +17,7 @@ static struct options
 
 int o_getattr(const char *path, struct stat *sbuf, struct fuse_file_info *fi)
 {
-    logger(DEBUG, "GETATTR, %s\n", path);
+    logger(DEBUG, "GETATTR, %s%s, %p, %p\n", prefix, path, sbuf, fi);
     options.filename = strdup("hello");
     options.contents = strdup("Hello World!\n");
     (void)fi;

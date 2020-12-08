@@ -17,7 +17,7 @@ static struct options
 
 int o_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi, enum fuse_readdir_flags flags)
 {
-  logger(DEBUG, "READDIR %s, %#X\n", path, buf);
+  logger(DEBUG, "READDIR %s%s, %#X, %d, %d, %p, %d\n", prefix, path, buf, filler, offset, fi, flags);
   options.filename = strdup("hello");
   options.contents = strdup("Hello World!\n");
   (void)offset;

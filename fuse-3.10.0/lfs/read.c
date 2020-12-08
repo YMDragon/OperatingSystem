@@ -17,7 +17,7 @@ static struct options
 
 int o_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
-    logger(DEBUG, "READ, %s\n", path);
+    logger(DEBUG, "READ, %s%s, %s, %d, %d, %p\n", prefix, path, buf, size, offset, fi);
     options1.filename = strdup("hello");
     options1.contents = strdup("Hello World!\n");
     size_t len;

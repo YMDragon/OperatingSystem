@@ -75,7 +75,7 @@ static struct fuse_operations ops = {
     .fsyncdir = o_fsyncdir,
     .init = o_init,
     .destroy = o_destroy,
-    .access = o_access,
+    //.access = o_access,
     .create = o_create,
     .lock = o_lock,
     .utimens = o_utimens,
@@ -93,6 +93,7 @@ int main(int argc, char **argv)
 {
     set_log_level(DEBUG);
     set_log_output(stdout);
+    generate_prefix();
 
     return fuse_main(argc, argv, &ops, NULL);
 }

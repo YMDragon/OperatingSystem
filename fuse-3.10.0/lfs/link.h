@@ -1,5 +1,6 @@
 #ifndef link_h
 #define link_h
 #include "./logger.h" /* logger */
+#include "./prefix.h" /* prefix */
 int o_link(const char *, const char *);
 #endif
