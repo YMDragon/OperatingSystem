@@ -6,7 +6,10 @@
 #include <stdlib.h>   /* malloc free */
 #include <string.h>   /* strcat strcpy */
 #include <errno.h>    /* errno */
-// The current working directory for the process
+// The mount directory
 char *prefix;
-void generate_prefix();
+// The current working directory for the process
+char *cwd;
+char *resolve_prefix(const char *);
+void generate_prefix(const char *);
 #endif

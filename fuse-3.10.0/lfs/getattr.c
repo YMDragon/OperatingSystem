@@ -1,42 +1,15 @@
 #include "getattr.h"
 
-#include <fuse.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <stddef.h>
-#include <assert.h>
-
-static struct options
+int o_getattr(const char *path, struct stat *stbuf, struct fuse_file_info *fi)
 {
-    const char *filename;
-    const char *contents;
-    int show_help;
-} options;
-
-int o_getattr(const char *path, struct stat *sbuf, struct fuse_file_info *fi)
-{
-    logger(DEBUG, "GETATTR, %s%s, %p, %p\n", prefix, path, sbuf, fi);
-    options.filename = strdup("hello");
-    options.contents = strdup("Hello World!\n");
+    logger(DEBUG, "GETATTR, %s%s, %p, %p\n", prefix, path, stbuf, fi);
     (void)fi;
-    int res = 0;
-
-    memset(sbuf, 0, sizeof(struct stat));
-    if (strcmp(path, "/") == 0)
-    {
-        sbuf->st_mode = S_IFDIR | 0755;
-        sbuf->st_nlink = 2;
-    }
-    else if (strcmp(path + 1, options.filename) == 0)
-    {
-        sbuf->st_mode = S_IFREG | 0444;
-        sbuf->st_nlink = 1;
-        sbuf->st_size = strlen(options.contents);
-    }
-    else
-        res = -ENOENT;
-
-    return res;
+    logger(DEBUG, "%s\n", path);
+    int fileId = get_fileId(path);
+    logger(DEBUG, "fileId %d\n", fileId);
+    if (fileId < 0)
+        return fileId;
+    if (lfs_metadata(fileId, stbuf) < 0)
+        return -ENOENT;
+    return 0;
 }

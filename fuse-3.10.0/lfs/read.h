@@ -3,5 +3,6 @@
 #include "./logger.h" /* logger */
 #include "./prefix.h" /* prefix */
 #include <fuse.h>     /* fuse_file_info */
+#include "directory.h"
 int o_read(const char *, char *, size_t, off_t, struct fuse_file_info *);
 #endif

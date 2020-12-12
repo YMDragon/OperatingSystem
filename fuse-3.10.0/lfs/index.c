@@ -41,6 +41,8 @@
 #include "./copy_file_range.h" /* copy_file_range */
 #include "./lseek.h"           /* lseek */
 
+#include "lfs.h"
+
 #include <fuse.h> /* fuse_main */
 
 #include "./logger.h" /* set_log_level set_log_output logger */
@@ -65,17 +67,17 @@ static struct fuse_operations ops = {
     .flush = o_flush,
     .release = o_release,
     .fsync = o_fsync,
-    .setxattr = o_setxattr,
-    .getxattr = o_getxattr,
-    .listxattr = o_listxattr,
-    .removexattr = o_removexattr,
+    //.setxattr = o_setxattr,
+    //.getxattr = o_getxattr,
+    //.listxattr = o_listxattr,
+    //.removexattr = o_removexattr,
     .opendir = o_opendir,
     .readdir = o_readdir,
     .releasedir = o_releasedir,
     .fsyncdir = o_fsyncdir,
     .init = o_init,
     .destroy = o_destroy,
-    //.access = o_access,
+    .access = o_access,
     .create = o_create,
     .lock = o_lock,
     .utimens = o_utimens,
@@ -93,7 +95,8 @@ int main(int argc, char **argv)
 {
     set_log_level(DEBUG);
     set_log_output(stdout);
-    generate_prefix();
+    generate_prefix(argv[1]);
+    lfs_init();
 
     return fuse_main(argc, argv, &ops, NULL);
 }

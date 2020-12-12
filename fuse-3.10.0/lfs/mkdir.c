@@ -1,8 +1,17 @@
-#include "./mkdir.h"
+#include "mkdir.h"
 
 int o_mkdir(const char *path, mode_t mode)
 {
-    logger(DEBUG, "MKDIR, %s%s, %d\n", prefix, path, mode);
-    logger(ERROR, "UNIMPLEMENTED: mkdir, path: %s, mode: %lo\n", path, (unsigned long)mode);
-    return -1;
+    logger(DEBUG, "MKDIR, %s%s, %o\n", prefix, path, mode);
+    int pos, size = strlen(path);
+    int parentfileId = get_parent_fileId(path, &pos);
+    if (parentfileId < 0)
+        return -parentfileId;
+    struct stat st;
+    struct fuse_context *fc = fuse_get_context();
+    st.st_mode = S_IFDIR | mode;
+    st.st_uid = fc->uid;
+    st.st_gid = fc->gid;
+    create_dir(path + pos, size - pos, st, parentfileId);
+    return 0;
 }
