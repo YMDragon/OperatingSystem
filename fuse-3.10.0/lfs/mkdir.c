@@ -6,7 +6,15 @@ int o_mkdir(const char *path, mode_t mode)
     int pos, size = strlen(path);
     int parentfileId = get_parent_fileId(path, &pos);
     if (parentfileId < 0)
+    {
+        //logger(DEBUG, "wrong!!!!!!!!!!!\n");
         return -parentfileId;
+    }
+    if (has_permission(parentfileId, W_OK) == 0)
+    {
+        //logger(DEBUG, "wrong!!!!!!!!!!!\n");
+        return -EACCES;
+    }
     struct stat st;
     struct fuse_context *fc = fuse_get_context();
     st.st_mode = S_IFDIR | mode;

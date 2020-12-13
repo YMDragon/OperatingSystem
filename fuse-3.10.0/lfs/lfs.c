@@ -20,6 +20,8 @@ struct MemoryData
     int curBlk;
     int cur_disk_pos;
     int file_num;
+    int seg_num;
+    struct Segment segData[MAX_SEGMENTS];
 };
 
 struct MemoryData memoryData;
@@ -29,7 +31,7 @@ void lfs_init()
     _fd = open("data", O_RDWR);
     if (_fd < 0)
     {
-        _fd = open("./data", O_RDWR | O_CREAT);
+        _fd = open("data", O_RDWR | O_CREAT);
         char *file = malloc(ALLOCATESIZE * sizeof(char));
         write(_fd, file, ALLOCATESIZE);
         segBegin = segEnd = NULL;
@@ -38,6 +40,7 @@ void lfs_init()
         cur_disk_pos = sizeof(struct MemoryData);
         file_num = 0;
         lfs_save();
+        free(file);
     }
     else
     {
@@ -48,13 +51,21 @@ void lfs_init()
         curBlk = memoryData.curBlk;
         cur_disk_pos = memoryData.cur_disk_pos;
         file_num = memoryData.file_num;
+        int i;
+        segBegin = &memoryData.segData[0];
+        for (i = 1; i < memoryData.seg_num; i++)
+        {
+            memoryData.segData[i].nextSegment = &memoryData.segData[i - 1];
+            segBegin = &memoryData.segData[i];
+        }
         logger(DEBUG, "file numbers %d\n", file_num);
-        logger(DEBUG, "%d\n", buffer.imap.numEntries);
+        //logger(DEBUG, "%d\n", buffer.imap.numEntries);
     }
 }
 
 int _lfs_read(const int fileId, char *buf, int blkNum, int offset, int size)
 {
+    //logger(DEBUG, "_lfs_read %d %d %d %d\n", fileId, blkNum, offset, size);
     if (offset < 0 || offset + size > BLOCKSIZE || size <= 0)
     {
         logger(ERROR, "_lfs_read error\n");
@@ -65,6 +76,7 @@ int _lfs_read(const int fileId, char *buf, int blkNum, int offset, int size)
     char tbuff[BLOCKSIZE];
 
     fileSize = _get_file_size(fileId);
+    //logger(DEBUG, "file size %d\n", fileSize);
     if (blkNum * BLOCKSIZE + offset >= fileSize)
         return 0;
     if (blkNum * BLOCKSIZE + offset + size > fileSize)
@@ -72,6 +84,7 @@ int _lfs_read(const int fileId, char *buf, int blkNum, int offset, int size)
 
     if ((inodePos = _fit_in_imap(buffer.imap, fileId)) != -1)
     {
+
         memcpy(tbuff, buffer.blockdata[inodePos].data, BLOCKSIZE);
         struct Inode inode = _get_inode_from_string(tbuff);
         if ((dataPos = _fit_in_inode(NULL, inode, blkNum)) != -1)
@@ -90,16 +103,18 @@ int _lfs_read(const int fileId, char *buf, int blkNum, int offset, int size)
             struct Inode inode = _get_inode_from_string(tbuff);
             if ((dataPos = _fit_in_inode(segPos, inode, blkNum)) != -1)
             {
-                _read_disk(tbuff, dataPos * BLOCKSIZE, BLOCKSIZE);
+                _read_disk(tbuff, segPos->filePos + dataPos * BLOCKSIZE, BLOCKSIZE);
                 memcpy(buf, tbuff + offset, size);
                 return size;
             }
         }
     }
+    logger(ERROR, "not found in anywhere!!!!!!!!!!\n");
 }
 
 int lfs_read(const int fileId, char *buf, int offset, int size)
 {
+    //logger(DEBUG, "lfs_read %d %d %d %d\n", fileId, offset, size);
     if (offset < 0)
     {
         logger(ERROR, "read at negtive position\n");
@@ -120,7 +135,7 @@ int lfs_read(const int fileId, char *buf, int offset, int size)
     return amount;
 }
 
-int _lfs_write(const int fileId, char *buf, int blkNum, int offset, int size)
+int _lfs_write(const int fileId, const char *buf, int blkNum, int offset, int size)
 {
     //logger(DEBUG, "_lfs_write %d %s %d %d %d\n", fileId, buf, blkNum, offset, size);
     if (offset < 0 || offset + size > BLOCKSIZE || size <= 0)
@@ -128,7 +143,7 @@ int _lfs_write(const int fileId, char *buf, int blkNum, int offset, int size)
         logger(ERROR, "_lfs_read error\n");
         return -1;
     }
-    if (curBlk > BLOCKS_PER_SEGMENT - 5)
+    if (curBlk > BLOCKS_PER_SEGMENT - 10) //
         lfs_fflush();
 
     int inodePos, fileSize;
@@ -178,16 +193,28 @@ int _lfs_write(const int fileId, char *buf, int blkNum, int offset, int size)
     return size;
 }
 
-int lfs_write(const int fileId, char *buf, int offset, int size)
+int lfs_write(const int fileId, const char *buf, int offset, int size)
 {
     int fileSize = _get_file_size(fileId);
     //logger(DEBUG, "lfs_write %d %s %d %d\n", fileId, buf, offset, size);
     int endAddr = offset + size;
     int pos, end, amount = 0;
 
-    if (offset > fileSize || offset < 0)
+    if (offset < 0)
     {
         logger(ERROR, "Append at nonexistent position\n");
+        return -1;
+    }
+
+    if (offset > fileSize)
+    {
+        char tbuff[offset - fileSize];
+        memset(tbuff, 0, sizeof(tbuff));
+        lfs_write(fileId, tbuff, fileSize, offset - fileSize);
+    }
+    if (_get_file_size(fileId) < offset)
+    {
+        logger(DEBUG, "file has no such long, unexception!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
         return -1;
     }
     for (pos = offset; pos < endAddr; pos = end)
@@ -205,14 +232,22 @@ int lfs_write(const int fileId, char *buf, int offset, int size)
 
 int lfs_create(struct stat st)
 {
+    logger(DEBUG, "create, curBlk %d\n", curBlk);
     char tbuff[BLOCKSIZE];
-    if (curBlk > BLOCKS_PER_SEGMENT - 5)
+    if (curBlk > BLOCKS_PER_SEGMENT - 10)
         lfs_fflush();
     file_num++;
     int fileId = file_num;
     struct Inode inode;
     inode.st = st;
-    //atime ctime mtime
+    inode.st.st_ino = fileId;
+
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    inode.st.st_ctim = ts;
+    inode.st.st_atim = ts;
+    inode.st.st_mtim = ts;
+
     _clear_inode(&inode);
     inode.size = 0;
     inode.level = 0;
@@ -223,6 +258,8 @@ int lfs_create(struct stat st)
     imapentry.blkNum = curBlk;
     buffer.imap.entry[buffer.imap.numEntries++] = imapentry;
     curBlk++;
+    logger(DEBUG, "create, curBlk %d\n", curBlk);
+    logger(DEBUG, "fileId %d\n", fileId);
     return fileId;
 }
 
@@ -234,7 +271,7 @@ int lfs_truncate(const int fileId, int size)
         return -1;
     }
 
-    if (curBlk > BLOCKS_PER_SEGMENT - 5)
+    if (curBlk > BLOCKS_PER_SEGMENT - 10)
         lfs_fflush();
 
     int inodePos;
@@ -260,8 +297,8 @@ int lfs_truncate(const int fileId, int size)
         struct Inode inode = _get_inode_from_string(tbuff);
         if (inode.size < size)
         {
-            logger(WARN, "remove to larger size\n");
-            return 1;
+            logger(WARN, "truncate to larger size\n");
+            return -1;
         }
         else
         {
@@ -278,14 +315,42 @@ int lfs_truncate(const int fileId, int size)
     }
 }
 
+int lfs_remove(const int fileId)
+{
+    int i, ok = -1;
+    struct Segment *segPos;
+
+    for (i = 0; i < buffer.imap.numEntries; i++)
+    {
+        if (buffer.imap.entry[i].fileId == fileId)
+        {
+            buffer.imap.entry[i].fileId = -1;
+            ok = 0;
+        }
+    }
+    for (segPos = segBegin; segPos != segEnd; segPos = segPos->nextSegment)
+    {
+        for (i = 0; i < segPos->imap.numEntries; i++)
+            if (segPos->imap.entry[i].fileId == fileId)
+            {
+                segPos->imap.entry[i].fileId = -1;
+                ok = 0;
+            }
+    }
+    return ok;
+}
+
 void lfs_fflush()
 {
+    logger(DEBUG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!flush %d\n", memoryData.seg_num);
     _write_disk((char *)&buffer.blockdata, cur_disk_pos, sizeof(buffer.blockdata));
     struct Segment segment;
     segment.imap = buffer.imap;
     segment.filePos = cur_disk_pos;
     segment.nextSegment = segBegin;
-    segBegin = &segment;
+    memoryData.segData[memoryData.seg_num] = segment;
+    segBegin = &memoryData.segData[memoryData.seg_num];
+    memoryData.seg_num++;
     memset(buffer.blockdata, 0, sizeof(buffer.blockdata));
     buffer.imap.numEntries = 0;
     curBlk = 0;
@@ -305,6 +370,8 @@ int lfs_metadata(const int fileId, struct stat *st)
         //logger(DEBUG, "%d %d\n", inode.size, inode.st.st_size);
         (*st) = inode.st;
         st->st_size = inode.size;
+        st->st_blksize = BLOCKSIZE;
+        st->st_blocks = (inode.size + BLOCKSIZE - 1) / BLOCKSIZE;
         return 0;
     }
     struct Segment *segPos = segBegin;
@@ -312,18 +379,24 @@ int lfs_metadata(const int fileId, struct stat *st)
     {
         if ((inodePos = _fit_in_imap(segPos->imap, fileId)) != -1)
         {
+            //logger(DEBUG, "find in disk %p %d %d\n", segPos, inodePos, segPos->filePos);
             _read_disk(tbuff, segPos->filePos + inodePos * BLOCKSIZE, BLOCKSIZE);
             struct Inode inode = _get_inode_from_string(tbuff);
+            //logger(DEBUG, "%d %d\n", inode.size, inode.st.st_size);
             (*st) = inode.st;
+            st->st_size = inode.size;
+            st->st_blksize = BLOCKSIZE;
+            st->st_blocks = (inode.size + BLOCKSIZE - 1) / BLOCKSIZE;
             return 0;
         }
     }
     logger(ERROR, "cannot find such file\n");
     return -1;
 }
+
 int lfs_change(const int fileId, struct stat st)
 {
-    if (curBlk > BLOCKS_PER_SEGMENT - 5)
+    if (curBlk > BLOCKS_PER_SEGMENT - 10)
         lfs_fflush();
 
     int inodePos;
@@ -378,11 +451,19 @@ void lfs_save()
 void _read_disk(char *buff, int offset, int size)
 {
     pread(_fd, buff, size, offset);
+    /*int i;
+    for (i = 0; i < 100; i++)
+        logger(DEBUG, "%c", buff[i]);
+    logger(DEBUG, "\n");*/
 }
 
 void _write_disk(char *buff, int offset, int size)
 {
     pwrite(_fd, buff, size, offset);
+    /*int i;
+    for (i = 0; i < 100; i++)
+        logger(DEBUG, "%c", buff[i]);
+    logger(DEBUG, "\n");*/
 }
 
 void _insert_inode_level(struct Inode *inode, int blockId, int blkNum, int level)
@@ -391,51 +472,57 @@ void _insert_inode_level(struct Inode *inode, int blockId, int blkNum, int level
     struct Inode nextInode;
     char tbuff[BLOCKSIZE];
     index = blockId;
-    for (i = 0; i < inode->level; i++)
+    for (i = 0; i < level; i++)
         index /= MAX_BLOCKS_INODE;
     index %= MAX_BLOCKS_INODE;
-    if (level == inode->level)
-    {
-        if (level == 0)
-        {
-            inode->entry[index].blockId = blockId;
-            inode->entry[index].blkNum = blkNum;
-        }
-        else
-        {
-            if (inode->entry[index].blockId != -1)
-            {
-                memcpy(tbuff, buffer.blockdata[inode->entry[index].blkNum].data, BLOCKSIZE);
-                nextInode = _get_inode_from_string(tbuff);
-            }
-            else
-            {
-                inode->entry[index].blockId = blockId;
-                inode->entry[index].blkNum = curBlk;
-                _clear_inode(&nextInode);
-                _get_string_from_inode(nextInode, tbuff);
-                memcpy(buffer.blockdata[curBlk].data, tbuff, BLOCKSIZE);
-                curBlk++;
-            }
-            _insert_inode_level(&nextInode, blockId, blkNum, level - 1);
-
-            _get_string_from_inode(nextInode, tbuff); //write back to buffer
-            memcpy(buffer.blockdata[inode->entry[index].blkNum].data, tbuff, BLOCKSIZE);
-        }
-    }
-    else
+    if (level > inode->level)
     {
         nextInode = (*inode);
-        _clear_inode(inode);
-        inode->level = level;
-        inode->entry[index].blockId = blockId;
-        inode->entry[index].blkNum = curBlk;
         _get_string_from_inode(nextInode, tbuff);
         memcpy(buffer.blockdata[curBlk].data, tbuff, BLOCKSIZE);
         curBlk++;
+        for (i = inode->level + 1; i < level; i++)
+        {
+            struct Inode tInode;
+            tInode.level = i;
+            _clear_inode(&tInode);
+            tInode.entry[0].blockId = blockId;
+            tInode.entry[0].blkNum = curBlk - 1;
+            _get_string_from_inode(tInode, tbuff);
+            memcpy(buffer.blockdata[curBlk].data, tbuff, BLOCKSIZE);
+            curBlk++;
+        }
+        _clear_inode(inode);
+        inode->level = level;
+        inode->entry[0].blockId = blockId;
+        inode->entry[0].blkNum = curBlk - 1;
+    }
+
+    if (level == 0)
+    {
+        inode->entry[index].blockId = blockId;
+        inode->entry[index].blkNum = blkNum;
+    }
+    else
+    {
+        if (inode->entry[index].blockId != -1)
+        {
+            memcpy(tbuff, buffer.blockdata[inode->entry[index].blkNum].data, BLOCKSIZE);
+            nextInode = _get_inode_from_string(tbuff);
+        }
+        else
+        {
+            inode->entry[index].blockId = blockId;
+            inode->entry[index].blkNum = curBlk;
+            nextInode.level = level - 1;
+            _clear_inode(&nextInode);
+            _get_string_from_inode(nextInode, tbuff);
+            memcpy(buffer.blockdata[curBlk].data, tbuff, BLOCKSIZE);
+            curBlk++;
+        }
         _insert_inode_level(&nextInode, blockId, blkNum, level - 1);
 
-        _get_string_from_inode(nextInode, tbuff); // write back to buffer
+        _get_string_from_inode(nextInode, tbuff); //write back to buffer
         memcpy(buffer.blockdata[inode->entry[index].blkNum].data, tbuff, BLOCKSIZE);
     }
 }
@@ -468,6 +555,7 @@ int _fit_in_inode(struct Segment *segPos, struct Inode inode, int blkNum)
     for (i = 0; i < inode.level; i++)
         index /= MAX_BLOCKS_INODE;
     index %= MAX_BLOCKS_INODE;
+    //logger(DEBUG, "_fit_in_inode %d %d, index %d\n", inode.level, blkNum, index);
     if (inode.level == 0)
     {
         if (inode.entry[index].blockId != -1)

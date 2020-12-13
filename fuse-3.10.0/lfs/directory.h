@@ -6,15 +6,10 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include "permission.h"
-#define ENTRYS_PER_DIRECTORY 16
 struct DirectoryEntry
 {
-    char name[60];
+    char name[252];
     int fileId;
-};
-struct DirectoryBlock
-{
-    struct DirectoryEntry entry[ENTRYS_PER_DIRECTORY];
 };
 int rootId;
 int add_entry(int fileId, const char *name, int size, int childfileId);

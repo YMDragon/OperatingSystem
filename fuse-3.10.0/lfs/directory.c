@@ -47,15 +47,14 @@ int get_fileId(const char *path)
         for (r = l; r < size; r++)
             if (path[r] == '/')
                 break;
-        logger(DEBUG, "%s %d %d\n", path, l, r);
+        //logger(DEBUG, "%s %d %d\n", path, l, r);
         if (lfs_metadata(fileId, &st) < 0)
             return -ENOENT;
         if ((st.st_mode & S_IFDIR) == 0)
             return -ENOTDIR;
-        if (has_permission(st, R_OK) == 0)
+        if (has_permission(fileId, R_OK) == 0)
             return -EACCES;
         found = 0;
-        logger(DEBUG, "%s %d %d\n", path, l, r);
         for (i = 0; i < st.st_size; i += sizeof(struct DirectoryEntry))
         {
             lfs_read(fileId, buf, i, sizeof(struct DirectoryEntry));
@@ -68,8 +67,12 @@ int get_fileId(const char *path)
             }
         }
         if (found == 0)
+        {
+            free(buf);
             return -ENOENT;
+        }
     }
+    free(buf);
     return fileId;
 }
 
@@ -92,7 +95,7 @@ int get_parent_fileId(const char *path, int *pos)
             return -ENOENT;
         if ((st.st_mode & S_IFDIR) == 0)
             return -ENOTDIR;
-        if (has_permission(st, R_OK) == 0)
+        if (has_permission(fileId, R_OK) == 0)
             return -EACCES;
         if (r >= size - 1)
         {
@@ -112,8 +115,12 @@ int get_parent_fileId(const char *path, int *pos)
             }
         }
         if (found == 0)
+        {
+            free(buf);
             return -ENOENT;
+        }
     }
+    free(buf);
     return fileId;
 }
 

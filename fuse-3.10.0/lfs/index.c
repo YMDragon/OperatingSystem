@@ -50,11 +50,11 @@
 static struct fuse_operations ops = {
     .getattr = o_getattr,
     .readlink = o_readlink,
-    .mknod = o_mknod,
+    //.mknod = o_mknod,
     .mkdir = o_mkdir,
     .unlink = o_unlink,
     .rmdir = o_rmdir,
-    .symlink = o_symlink,
+    //.symlink = o_symlink,
     .rename = o_rename,
     .link = o_link,
     .chmod = o_chmod,
@@ -63,7 +63,7 @@ static struct fuse_operations ops = {
     .open = o_open,
     .read = o_read,
     .write = o_write,
-    .statfs = o_statfs,
+    //.statfs = o_statfs,
     .flush = o_flush,
     .release = o_release,
     .fsync = o_fsync,
@@ -79,17 +79,18 @@ static struct fuse_operations ops = {
     .destroy = o_destroy,
     .access = o_access,
     .create = o_create,
-    .lock = o_lock,
+    //.lock = o_lock,
     .utimens = o_utimens,
-    .bmap = o_bmap,
-    .ioctl = o_ioctl,
-    .poll = o_poll,
-    .write_buf = o_write_buf,
-    .read_buf = o_read_buf,
-    .flock = o_flock,
-    .fallocate = o_fallocate,
-    .copy_file_range = o_copy_file_range,
-    .lseek = o_lseek};
+    //.bmap = o_bmap,
+    //.ioctl = o_ioctl,
+    //.poll = o_poll,
+    //.write_buf = o_write_buf,
+    //.read_buf = o_read_buf,
+    //.flock = o_flock,
+    //.fallocate = o_fallocate,
+    //.copy_file_range = o_copy_file_range,
+    //.lseek = o_lseek
+};
 
 int main(int argc, char **argv)
 {

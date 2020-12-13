@@ -4,5 +4,7 @@
 #include <fuse.h>
 #include <unistd.h>
 #include <sys/stat.h>
-int has_permission(struct stat st, int mode);
+#include "lfs.h"
+int has_permission(int fileId, int mode);
+int is_owner(int fileId);
 #endif

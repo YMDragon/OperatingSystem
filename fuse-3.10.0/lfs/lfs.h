@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <time.h>
 
 struct SegBuffer
 {
@@ -21,8 +22,10 @@ struct SegBuffer
 void lfs_init();
 int lfs_create(struct stat st);
 int lfs_read(const int fileId, char *buf, int offset, int size);
-int lfs_write(const int fileId, char *buf, int offset, int size);
+int lfs_write(const int fileId, const char *buf, int offset, int size);
 int lfs_truncate(const int fileId, int size);
+int lfs_remove(const int fileId);
+
 void lfs_fflush();
 
 int file_number();

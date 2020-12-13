@@ -1,6 +1,6 @@
 #ifndef inode_h
 #define inode_h
-#define MAX_BLOCKS_INODE 16
+#define MAX_BLOCKS_INODE 16 //TODO
 #include <sys/stat.h>
 struct InodeEntry
 {

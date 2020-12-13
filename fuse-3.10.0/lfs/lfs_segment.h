@@ -2,7 +2,7 @@
 #define segment_h
 #include "lfs_block.h"
 #define BLOCKS_PER_SEGMENT 1024
-#define FILES_PER_SEGMENT 500
+#define MAX_SEGMENTS 105
 struct ImapEntry
 {
     int fileId;
@@ -10,7 +10,7 @@ struct ImapEntry
 };
 struct Imap
 {
-    struct ImapEntry entry[FILES_PER_SEGMENT];
+    struct ImapEntry entry[BLOCKS_PER_SEGMENT];
     int numEntries;
 };
 struct Segment

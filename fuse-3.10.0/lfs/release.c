@@ -7,5 +7,5 @@ int o_release(const char *path, struct fuse_file_info *fi)
     if (fileId < 0)
         return fileId;
     fi->fh = 0;
-    return -1;
+    return 0;
 }

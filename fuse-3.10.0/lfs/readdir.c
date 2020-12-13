@@ -10,6 +10,8 @@ int o_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset,
     int fileId = get_fileId(path);
     if (fileId < 0)
         return fileId;
+    if (has_permission(fileId, R_OK) == 0)
+        return -EACCES;
     struct stat st, childst;
     char *buffer = malloc(sizeof(struct DirectoryEntry));
     struct DirectoryEntry *de;
@@ -24,10 +26,14 @@ int o_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset,
         lfs_read(fileId, buffer, i, sizeof(struct DirectoryEntry));
         de = (struct DirectoryEntry *)buffer;
         if (lfs_metadata(de->fileId, &childst) < 0)
+        {
+            free(buffer);
             return -ENOENT;
+        }
         //logger(DEBUG, "%s %d\n", de->name, de->fileId);
-        filler(buf, de->name, &childst, 0, 0);
-        //filler(buf, de->name, NULL, 0, 0);
+        //filler(buf, de->name, &childst, 0, 0);
+        filler(buf, de->name, NULL, 0, 0);
     }
+    free(buffer);
     return 0;
 }
