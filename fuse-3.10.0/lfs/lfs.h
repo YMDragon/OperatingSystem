@@ -26,11 +26,12 @@ int lfs_write(const int fileId, const char *buf, int offset, int size);
 int lfs_truncate(const int fileId, int size);
 int lfs_remove(const int fileId);
 
-void lfs_fflush();
+void lfs_writeback();
 
 int file_number();
 int lfs_metadata(const int fileId, struct stat *st);
 int lfs_change(const int fileId, struct stat st);
 
 void lfs_save(); //
+
 #endif

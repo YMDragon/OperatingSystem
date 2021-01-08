@@ -4,5 +4,6 @@
 #include "./prefix.h" /* prefix */
 #include "directory.h"
 #include "lfs.h"
+#include "mutex.h"
 int o_rmdir(const char *);
 #endif

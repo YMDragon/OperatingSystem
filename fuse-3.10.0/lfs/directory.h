@@ -6,6 +6,8 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include "permission.h"
+#include "mutex.h"
+
 struct DirectoryEntry
 {
     char name[252];

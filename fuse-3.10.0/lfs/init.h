@@ -5,5 +5,6 @@
 #include <sys/stat.h>
 #include "lfs.h"
 #include "directory.h"
+#include "mutex.h"
 void *o_init(struct fuse_conn_info *, struct fuse_config *cfg);
 #endif

@@ -4,6 +4,7 @@
 
 void *o_init(struct fuse_conn_info *conn, struct fuse_config *cfg)
 {
+    //pthread_mutex_init(&mutex, NULL);
     logger(DEBUG, "INIT %p, %p\n", conn, cfg);
     cfg->use_ino = 1;
     if (file_number() == 0)

@@ -2,14 +2,25 @@
 
 int o_unlink(const char *path)
 {
+    //pthread_mutex_lock(&mutex);
     logger(DEBUG, "UNLINK, %s%s\n", prefix, path);
     int fileId = get_fileId(path);
     if (fileId < 0)
+    {
+        //pthread_mutex_unlock(&mutex);
         return -fileId;
+    }
+    pthread_mutex_lock(&mutex[fileId]);
     int pos, size = strlen(path);
     int parentfileId = get_parent_fileId(path, &pos);
+    pthread_mutex_lock(&mutex[parentfileId]);
     if (has_permission(parentfileId, W_OK) == 0)
+    {
+        pthread_mutex_unlock(&mutex[parentfileId]);
+        pthread_mutex_unlock(&mutex[fileId]);
+        //pthread_mutex_unlock(&mutex);
         return -EACCES;
+    }
     struct stat st;
     char *buf = malloc(sizeof(struct DirectoryEntry));
     struct DirectoryEntry *de;
@@ -33,5 +44,8 @@ int o_unlink(const char *path)
     if (st.st_nlink == 0)
         lfs_remove(fileId);
     free(buf);
+    pthread_mutex_unlock(&mutex[parentfileId]);
+    pthread_mutex_unlock(&mutex[fileId]);
+    //pthread_mutex_unlock(&mutex);
     return 0;
 }

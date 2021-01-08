@@ -7,5 +7,6 @@
 #include "directory.h"
 #include "lfs.h"
 #include "permission.h"
+#include "mutex.h"
 int o_chown(const char *, uid_t, gid_t, struct fuse_file_info *);
 #endif

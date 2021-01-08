@@ -4,5 +4,6 @@
 #include "./prefix.h" /* prefix */
 #include "directory.h"
 #include "lfs.h"
+#include "mutex.h"
 int o_rename(const char *, const char *, unsigned int);
 #endif

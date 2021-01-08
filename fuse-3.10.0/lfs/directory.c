@@ -16,6 +16,7 @@ int create_dir(const char *name, int size, struct stat st, int parentfileId)
 {
     st.st_nlink = 2;
     int fileId = lfs_create(st);
+    pthread_mutex_init(&mutex[fileId], NULL);
     if (parentfileId > 0)
     {
         struct stat parentst;
@@ -48,12 +49,22 @@ int get_fileId(const char *path)
             if (path[r] == '/')
                 break;
         //logger(DEBUG, "%s %d %d\n", path, l, r);
+        pthread_mutex_lock(&mutex[fileId]);
         if (lfs_metadata(fileId, &st) < 0)
+        {
+            pthread_mutex_unlock(&mutex[fileId]);
             return -ENOENT;
+        }
         if ((st.st_mode & S_IFDIR) == 0)
+        {
+            pthread_mutex_unlock(&mutex[fileId]);
             return -ENOTDIR;
+        }
         if (has_permission(fileId, R_OK) == 0)
+        {
+            pthread_mutex_unlock(&mutex[fileId]);
             return -EACCES;
+        }
         found = 0;
         for (i = 0; i < st.st_size; i += sizeof(struct DirectoryEntry))
         {
@@ -61,6 +72,7 @@ int get_fileId(const char *path)
             de = (struct DirectoryEntry *)buf;
             if (is_match(de, path + l, r - l))
             {
+                pthread_mutex_unlock(&mutex[fileId]);
                 fileId = de->fileId;
                 found = 1;
                 break;
@@ -69,6 +81,7 @@ int get_fileId(const char *path)
         if (found == 0)
         {
             free(buf);
+            pthread_mutex_unlock(&mutex[fileId]);
             return -ENOENT;
         }
     }
@@ -91,15 +104,26 @@ int get_parent_fileId(const char *path, int *pos)
         for (r = l; r < size; r++)
             if (path[r] == '/')
                 break;
+        pthread_mutex_lock(&mutex[fileId]);
         if (lfs_metadata(fileId, &st) < 0)
+        {
+            pthread_mutex_unlock(&mutex[fileId]);
             return -ENOENT;
+        }
         if ((st.st_mode & S_IFDIR) == 0)
+        {
+            pthread_mutex_unlock(&mutex[fileId]);
             return -ENOTDIR;
+        }
         if (has_permission(fileId, R_OK) == 0)
+        {
+            pthread_mutex_unlock(&mutex[fileId]);
             return -EACCES;
+        }
         if (r >= size - 1)
         {
             *pos = l;
+            pthread_mutex_unlock(&mutex[fileId]);
             return fileId;
         }
         found = 0;
@@ -109,6 +133,7 @@ int get_parent_fileId(const char *path, int *pos)
             de = (struct DirectoryEntry *)buf;
             if (is_match(de, path + l, r - l))
             {
+                pthread_mutex_unlock(&mutex[fileId]);
                 fileId = de->fileId;
                 found = 1;
                 break;
@@ -117,6 +142,7 @@ int get_parent_fileId(const char *path, int *pos)
         if (found == 0)
         {
             free(buf);
+            pthread_mutex_unlock(&mutex[fileId]);
             return -ENOENT;
         }
     }

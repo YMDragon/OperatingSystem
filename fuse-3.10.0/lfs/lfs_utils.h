@@ -24,4 +24,12 @@ struct Inode _fetch_inode(int fileId);
 
 int _get_file_size(int fileId);
 
+void garbage_collection();
+
+void _rewrite(struct Segment *seg, int fileId, int blkNum);
+
+int _is_new_available(struct Segment *seg, int fileId, int blockId);
+
+void lfs_fflush();
+
 #endif

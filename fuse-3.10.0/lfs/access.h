@@ -6,5 +6,6 @@
 #include "lfs.h"
 #include "directory.h"
 #include "permission.h"
+#include "mutex.h"
 int o_access(const char *, int);
 #endif
